@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Container, TextField, Autocomplete, Card, CardContent, Typography, Button, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Rating, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { Container, TextField, Autocomplete, Typography,Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Rating} from "@mui/material";
+import Map from "../components/Map";
 
 const neighborhoods = [
     { name: "Bairro A", price: "R$ 7.500", trend: "+5%", safety: "4", services: "3", lat: -23.55052, lng: -46.633308 },
@@ -53,17 +52,7 @@ const NeighborhoodExplorer = (props) => {
             
             {/* Mapa Interativo */}
             <Typography variant="h5" sx={{ mt: 3 }}>Localização dos Bairros</Typography>
-            <MapContainer center={[-23.55052, -46.633308]} zoom={12} style={{ height: "400px", width: "100%", marginTop: "20px" }}>
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              {selectedNeighborhoods.map((neighborhood, index) => (
-                <Marker key={index} position={[neighborhood.lat, neighborhood.lng]}>
-                  <Popup>
-                    <strong>{neighborhood.name}</strong><br />
-                    Preço Médio/m²: {neighborhood.price}
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+            <Map neighborhoods={selectedNeighborhoods}/>
           </>
         )}
       </Container>

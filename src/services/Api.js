@@ -6,19 +6,19 @@ export async function getLocations() {
   return res.json();
 }
 
-export async function getLocationbyId() {
+export async function getLocationbyId(id) {
     const res = await fetch(`${API_URL}/locations/${id}/`);
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
-export async function getLocationProperties() {
+export async function getLocationProperties(id) {
     const res = await fetch(`${API_URL}/locations/${id}/properties/`);
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
-export async function getLocationSubLocations() {
+export async function getLocationSubLocations(id) {
     const res = await fetch(`${API_URL}/locations/${id}/sub_locations/`);
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
@@ -30,7 +30,7 @@ export async function getProperties() {
     return res.json();
 }
 
-export async function getPropertyId() {
+export async function getPropertyId(id) {
     const res = await fetch(`${API_URL}/properties/${id}/`);
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
@@ -42,7 +42,7 @@ export async function getUsers() {
     return res.json();
 }
 
-export async function getUsersId() {
+export async function getUsersId(id) {
     const res = await fetch(`${API_URL}/users/${id}/`);
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
