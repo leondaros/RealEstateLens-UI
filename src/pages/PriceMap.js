@@ -4,8 +4,6 @@ import {
   Container, 
   Typography, 
   Paper, 
-  AppBar, 
-  Toolbar, 
   Button,
   Slider,
   FormControl,
@@ -14,14 +12,42 @@ import {
   MenuItem,
   Grid,
   Card,
-  CardContent,
-  Tabs,
-  Tab
+  CardContent
 } from '@mui/material';
-import MapIcon from '@mui/icons-material/Map';
-import LayersIcon from '@mui/icons-material/Layers';
-import InfoIcon from '@mui/icons-material/Info';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import wellknown from "wellknown";
+import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
+
+function getLatLngsFromGeometry(geometry) {
+  if (!geometry) return [];
+  const parsed = wellknown.parse(geometry);
+  if (!parsed) return [];
+  if (parsed.type === "Polygon") {
+    return parsed.coordinates.map(ring => ring.map(([lng, lat]) => [lat, lng]));
+  } else if (parsed.type === "MultiPolygon") {
+    return parsed.coordinates.flatMap(poly =>
+      poly.map(ring => ring.map(([lng, lat]) => [lat, lng]))
+    );
+  }
+  return [];
+}
+
+function getSublocationStats(sub_locations, propertyType, priceRange) {
+  return sub_locations.map(subloc => {
+    const count = (subloc.properties || []).filter(prop => {
+      const matchesType = propertyType === 'all' || prop.type === propertyType;
+      const matchesPrice = !priceRange || (prop.price >= priceRange[0] && prop.price <= priceRange[1]);
+      return matchesType && matchesPrice;
+    }).length;
+    return { ...subloc, count };
+  });
+}
+
+function getColor(value, breaks, colors) {
+  for (let i = 0; i < breaks.length; i++) {
+    if (value <= breaks[i]) return colors[i];
+  }
+  return colors[colors.length - 1];
+}
 
 const MapPlaceholder = () => (
   <Box 
@@ -49,14 +75,14 @@ const MapPlaceholder = () => (
   </Box>
 );
 
-function PriceMap() {
-  const [mapType, setMapType] = useState(0);
-  const [priceRange, setPriceRange] = useState([500000, 2000000]);
+function PriceMap({ locationId, locationData, sub_locations }) {
+  const [priceRange, setPriceRange] = useState([0, 200000000000]);
   const [propertyType, setPropertyType] = useState('all');
 
-  const handleMapTypeChange = (event, newValue) => {
-    setMapType(newValue);
-  };
+  const stats = getSublocationStats(sub_locations, propertyType, priceRange);
+  const counts = stats.map(s => s.count);
+  const breaks = [5, 10, 20, 40]; // Example breaks
+  const colors = ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'];
 
   const handlePriceChange = (event, newValue) => {
     setPriceRange(newValue);
@@ -68,55 +94,10 @@ function PriceMap() {
 
   return (
     <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white' }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: '1.75rem' }}>
-            Garopaba
-          </Typography>
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-            <Button color="inherit">Dashboard</Button>
-            <Button color="inherit" variant="outlined">Mapas</Button>
-            <Button color="inherit">Bairros</Button>
-            <Button color="inherit">Análises</Button>
-            <Button color="inherit">Contribuir</Button>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" color="inherit" sx={{ borderRadius: 2 }}>
-              Sign in
-            </Button>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              sx={{ 
-                borderRadius: 2, 
-                backgroundColor: '#222', 
-                '&:hover': { backgroundColor: '#000' }
-              }}
-            >
-              Register
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', mb: 3 }}>
           Análise de Preços Imobiliários
         </Typography>
-
-        <Paper sx={{ mb: 3 }}>
-          <Tabs
-            value={mapType}
-            onChange={handleMapTypeChange}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-          >
-            <Tab icon={<AttachMoneyIcon />} label="Preço Médio" />
-            <Tab icon={<LayersIcon />} label="Densidade de Ofertas" />
-            <Tab icon={<InfoIcon />} label="Insights" />
-          </Tabs>
-        </Paper>
 
         <Paper sx={{ p: 3, mb: 3 }}>
           <Grid container spacing={3} alignItems="center">
@@ -160,7 +141,34 @@ function PriceMap() {
         </Paper>
 
         <Paper sx={{ mb: 3, overflow: 'hidden' }}>
-          <MapPlaceholder />
+          <Box sx={{ height: 500, width: "100%" }}>
+            <MapContainer
+              center={
+                locationData && locationData.center_lat && locationData.center_lng
+                  ? [locationData.center_lat, locationData.center_lng]
+                  : [-28.0278, -48.6192] // fallback default
+              }
+              zoom={13}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {stats.map((subloc, idx) => {
+                const latlngs = getLatLngsFromGeometry(subloc.geometry);
+                const color = getColor(subloc.count, breaks, colors);
+                return (
+                  <Polygon
+                    key={subloc.id || idx}
+                    positions={latlngs}
+                    pathOptions={{ fillColor: color, color: "#333", weight: 2, fillOpacity: 0.7 }}
+                  >
+                    <Tooltip>
+                      {subloc.name}: {subloc.count} imóveis
+                    </Tooltip>
+                  </Polygon>
+                );
+              })}
+            </MapContainer>
+          </Box>
         </Paper>
 
         <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 2, mt: 4 }}>

@@ -4,66 +4,125 @@ import {
   Box,
   Card,
   CardContent,
+  Stack,
+  CardActionArea,
 } from "@mui/material";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import SecurityIcon from "@mui/icons-material/Security";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { MapContainer, TileLayer, Polygon } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, useMap } from "react-leaflet";
 import wellknown from "wellknown";
-
-const fillBlueOptions = { color: 'blue' };
+import { useNavigate } from "react-router-dom";
 
 function getLatLngsFromGeometry(geometry) {
   if (!geometry) return [];
   const parsed = wellknown.parse(geometry);
   if (!parsed) return [];
   if (parsed.type === "Polygon") {
-    // Polygon: [ [ [lng, lat], ... ] ]
-    return parsed.coordinates.map(ring => ring.map(([lng, lat]) => [lat, lng]));
+    return parsed.coordinates.map((ring) =>
+      ring.map(([lng, lat]) => [lat, lng])
+    );
   } else if (parsed.type === "MultiPolygon") {
-    // MultiPolygon: [ [ [ [lng, lat], ... ] ] ]
-    return parsed.coordinates.map(polygon => polygon.map(ring => ring.map(([lng, lat]) => [lat, lng])));
+    return parsed.coordinates.map((poly) =>
+      poly.map((ring) => ring.map(([lng, lat]) => [lat, lng]))
+    );
   }
   return [];
 }
 
-const LocationCard = ({ name, rating, safety, average_price, geometry }) => {
+function getPolygonBounds(latlngs) {
+  const allCoords = latlngs.flat(2);
+  let minLat = 90,
+    minLng = 180,
+    maxLat = -90,
+    maxLng = -180;
+  allCoords.forEach(([lat, lng]) => {
+    minLat = Math.min(minLat, lat);
+    minLng = Math.min(minLng, lng);
+    maxLat = Math.max(maxLat, lat);
+    maxLng = Math.max(maxLng, lng);
+  });
+  return [
+    [minLat, minLng],
+    [maxLat, maxLng],
+  ];
+}
+
+function FitBounds({ bounds }) {
+  const map = useMap();
+  React.useEffect(() => {
+    if (bounds) map.fitBounds(bounds, { padding: [20, 20] });
+  }, [map, bounds]);
+  return null;
+}
+
+const LocationCard = ({ id, name, rating, safety, average_price, geometry }) => {
   const latlngs = getLatLngsFromGeometry(geometry);
+  const bounds = latlngs.length ? getPolygonBounds(latlngs) : null;
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    navigate(`/location/${id}`, { 
+      state: { 
+        name,
+        rating,
+        safety,
+        average_price,
+        geometry
+      }
+    });
+  };
+
   return (
-    <Card>
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          {name}
-        </Typography>
-        <Box sx={{ height: 200, width: "100%" }}>
+    <Card sx={{ borderRadius: 2, boxShadow: 4, overflow: 'hidden' }}>
+      <CardActionArea onClick={handleCardClick}>
+        <Box sx={{ height: 200, width: '100%', position: 'relative' }}>
           <MapContainer
-            center={[-28.0276, -48.6192]}
-            zoom={12}
-            style={{ height: "100%", width: "100%" }}>
+            bounds={bounds}
+            scrollWheelZoom={false}
+            doubleClickZoom={false}
+            dragging={false}
+            zoomControl={false}
+            touchZoom={false}
+            style={{ height: '100%', width: '100%' }}
+          >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {latlngs.length > 0 && Array.isArray(latlngs[0][0]) ? (
-              // MultiPolygon or Polygon with holes
-              latlngs.map((polygon, i) => (
-                <Polygon key={i} pathOptions={{ fillColor: 'blue', weight: 2, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.9 }} positions={polygon} />
-              ))
-            ) : null}
+            {bounds && <FitBounds bounds={bounds} />}
+            {latlngs.map((polygon, i) => (
+              <Polygon
+                key={i}
+                positions={polygon}
+                pathOptions={{
+                  fillColor: '#1976d2',
+                  color: '#fff',
+                  weight: 2,
+                  fillOpacity: 0.6,
+                  dashArray: '3',
+                }}
+              />
+            ))}
           </MapContainer>
         </Box>
-        <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <LocationCityIcon fontSize="small" />
-            <Typography variant="body2">Rating: {rating}</Typography>
-          </Box>
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <SecurityIcon fontSize="small" />
-            <Typography variant="body2">Safety: {safety}</Typography>
-          </Box>
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <AttachMoneyIcon fontSize="small" />
-            <Typography variant="body2">Avg. Price: ${average_price}</Typography>
-          </Box>
-        </Box>
-      </CardContent>
+        <CardContent>
+          <Typography variant="h6" align="center" gutterBottom>
+            {name}
+          </Typography>
+          <Stack direction="row" spacing={3} justifyContent="center">
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <LocationCityIcon />
+              <Typography variant="body2">{rating}</Typography>
+            </Stack>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <SecurityIcon />
+              <Typography variant="body2">{safety}</Typography>
+            </Stack>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <AttachMoneyIcon />
+              <Typography variant="body2">${average_price}</Typography>
+            </Stack>
+          </Stack>
+        </CardContent>
+      </CardActionArea>
     </Card>
   );
 };

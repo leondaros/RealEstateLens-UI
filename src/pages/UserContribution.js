@@ -23,6 +23,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
 import ParkIcon from '@mui/icons-material/Park';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import MainAppBar from '../components/MainAppBar';
 
 function UserContribution() {
   const [activeStep, setActiveStep] = useState(0);
@@ -164,30 +165,33 @@ function UserContribution() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4 }}>
-        Contribuir com Informações do Bairro
-      </Typography>
+    <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+      <MainAppBar />
+      <Container maxWidth="md" sx={{ py: 5 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4 }}>
+          Contribuir com Informações do Bairro
+        </Typography>
 
-      <Paper sx={{ p: 4 }}>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+        <Paper sx={{ p: 4 }}>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
 
-        {renderStepContent(activeStep)}
+          {renderStepContent(activeStep)}
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button disabled={activeStep === 0} onClick={handleBack}>Voltar</Button>
-          <Button variant="contained" onClick={handleNext}>
-            {activeStep === steps.length - 1 ? 'Finalizar' : 'Avançar'}
-          </Button>
-        </Box>
-      </Paper>
-    </Container>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+            <Button disabled={activeStep === 0} onClick={handleBack}>Voltar</Button>
+            <Button variant="contained" onClick={handleNext}>
+              {activeStep === steps.length - 1 ? 'Finalizar' : 'Avançar'}
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    </div>
   );
 }
 

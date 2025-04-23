@@ -1,27 +1,32 @@
 import React from "react";
-import {
-  Typography,
-  Grid,
-} from "@mui/material";
+import { Container, Typography, Grid, Box } from "@mui/material";
 import LocationCard from "./LocationCard";
 
 const LocationsList = ({ locations }) => (
-  <>
-    <Typography variant="h4" gutterBottom>
-      Neighborhoods
-    </Typography>
-    <Typography variant="subtitle1" gutterBottom>
-      Explore top areas of the city
-    </Typography>
-    <Grid container spacing={3} sx={{ mt: 2 }} justifyContent="center">
-      {locations.map((location) => (
-        <Grid item xs={12} sm={6} md={4} key={location.name}>
+  <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box textAlign="center" mb={4}>
+      <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
+        Neighborhoods
+      </Typography>
+      <Typography variant="subtitle1" color="text.secondary">
+        Explore top areas of the city
+      </Typography>
+    </Box>
+
+    <Grid container spacing={4} justifyContent="center">
+      {locations.sub_locations && locations.sub_locations.map((location, index) => (
+        <Grid
+          item
+          key={location.id || index}
+          xs={12}
+          sm={6}
+          md={4}
+        >
           <LocationCard {...location} />
         </Grid>
       ))}
     </Grid>
-  </>
+  </Container>
 );
 
 export default LocationsList;
-

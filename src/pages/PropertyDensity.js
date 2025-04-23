@@ -4,8 +4,6 @@ import {
   Container, 
   Typography, 
   Paper, 
-  AppBar, 
-  Toolbar, 
   Button,
   FormControl,
   InputLabel,
@@ -14,8 +12,6 @@ import {
   Grid,
   Card,
   CardContent,
-  Tabs,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -24,43 +20,12 @@ import {
   TableRow,
   Chip
 } from '@mui/material';
-import LayersIcon from '@mui/icons-material/Layers';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { MapContainer, TileLayer } from "react-leaflet";
+import HeatmapLayer from "../components/HeatmapLayer";
 
-const DensityMapPlaceholder = () => (
-  <Box 
-    sx={{ 
-      height: 500, 
-      backgroundColor: '#e0e0e0',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'hidden'
-    }}
-  >
-    <Box sx={{ position: 'absolute', width: '100%', height: '100%' }}>
-      <Box sx={{ position: 'absolute', top: '30%', left: '20%', width: '20%', height: '20%', background: 'radial-gradient(circle, rgba(255,0,0,0.7) 0%, rgba(255,0,0,0) 70%)', borderRadius: '50%' }} />
-      <Box sx={{ position: 'absolute', top: '40%', left: '25%', width: '15%', height: '15%', background: 'radial-gradient(circle, rgba(255,0,0,0.5) 0%, rgba(255,0,0,0) 70%)', borderRadius: '50%' }} />
-      <Box sx={{ position: 'absolute', top: '25%', left: '50%', width: '25%', height: '25%', background: 'radial-gradient(circle, rgba(255,0,0,0.8) 0%, rgba(255,0,0,0) 70%)', borderRadius: '50%' }} />
-      <Box sx={{ position: 'absolute', top: '60%', left: '40%', width: '20%', height: '20%', background: 'radial-gradient(circle, rgba(255,0,0,0.6) 0%, rgba(255,0,0,0) 70%)', borderRadius: '50%' }} />
-      <Box sx={{ position: 'absolute', top: '50%', left: '70%', width: '15%', height: '15%', background: 'radial-gradient(circle, rgba(255,0,0,0.7) 0%, rgba(255,0,0,0) 70%)', borderRadius: '50%' }} />
-    </Box>
-    <Typography variant="h6" color="text.secondary" sx={{ zIndex: 1 }}>
-      Mapa de Densidade de Ofertas
-    </Typography>
-  </Box>
-);
-
-function PropertyDensity() {
-  const [viewType, setViewType] = useState(0);
+function PropertyDensity({ id, locationData, sub_locations }) {
   const [propertyType, setPropertyType] = useState('all');
   const [timeRange, setTimeRange] = useState('3m');
-
-  const handleViewTypeChange = (event, newValue) => {
-    setViewType(newValue);
-  };
 
   const handlePropertyTypeChange = (event) => {
     setPropertyType(event.target.value);
@@ -68,6 +33,57 @@ function PropertyDensity() {
 
   const handleTimeRangeChange = (event) => {
     setTimeRange(event.target.value);
+  };
+
+  // Helper to parse "SRID=4326;POINT (lng lat)" to [lat, lng]
+  function parsePointWKT(pointStr) {
+    if (!pointStr || typeof pointStr !== "string") return null;
+    // Remove SRID if present
+    const match = pointStr.match(/POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i);
+    if (!match) return null;
+    const lng = parseFloat(match[1]);
+    const lat = parseFloat(match[2]);
+    if (isNaN(lat) || isNaN(lng)) return null;
+    return [lat, lng];
+  }
+
+  // Collect all property points from sublocations
+  const getHeatmapPoints = () => {
+    if (!locationData || !sub_locations){
+      console.log(locationData)
+      console.log(sub_locations) 
+      return [];
+    }
+    let points = [];
+    sub_locations.forEach((subloc) => {
+      if (subloc.properties && Array.isArray(subloc.properties)) {
+        subloc.properties.forEach((prop) => {
+          console.log(prop);
+          if (propertyType === 'all' || prop.type === propertyType) {
+            // Try to get coordinates from Point WKT string
+            if (prop.coordinates) {
+              const latlng = parsePointWKT(prop.coordinates);
+              if (latlng) {
+                points.push([...latlng, 1]);
+                return;
+              }
+            }
+            // Fallback to latitude/longitude fields if present
+            if (prop.latitude && prop.longitude) {
+              points.push([prop.latitude, prop.longitude, 1]);
+            }
+          }
+        });
+      }
+    });
+    return points;
+  };
+
+  const getMapCenter = () => {
+    if (locationData && locationData.center_lat && locationData.center_lng) {
+      return [locationData.center_lat, locationData.center_lng];
+    }
+    return [-28.0278, -48.6192];
   };
 
   const densityData = [
@@ -80,55 +96,10 @@ function PropertyDensity() {
 
   return (
     <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-      <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white' }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: '1.75rem' }}>
-            Garopaba
-          </Typography>
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-            <Button color="inherit">Dashboard</Button>
-            <Button color="inherit" variant="outlined">Mapas</Button>
-            <Button color="inherit">Bairros</Button>
-            <Button color="inherit">Análises</Button>
-            <Button color="inherit">Contribuir</Button>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" color="inherit" sx={{ borderRadius: 2 }}>
-              Sign in
-            </Button>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              sx={{ 
-                borderRadius: 2, 
-                backgroundColor: '#222', 
-                '&:hover': { backgroundColor: '#000' }
-              }}
-            >
-              Register
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', mb: 3 }}>
           Densidade de Ofertas Imobiliárias
         </Typography>
-
-        <Paper sx={{ mb: 3 }}>
-          <Tabs
-            value={viewType}
-            onChange={handleViewTypeChange}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-          >
-            <Tab icon={<LayersIcon />} label="Mapa de Calor" />
-            <Tab icon={<TrendingUpIcon />} label="Tendências" />
-            <Tab icon={<LocationOnIcon />} label="Por Localidade" />
-          </Tabs>
-        </Paper>
 
         <Paper sx={{ p: 3, mb: 3 }}>
           <Grid container spacing={3} alignItems="center">
@@ -167,7 +138,20 @@ function PropertyDensity() {
         </Paper>
 
         <Paper sx={{ mb: 3, overflow: 'hidden' }}>
-          <DensityMapPlaceholder />
+          <Box sx={{ height: 500, width: "100%" }}>
+            <MapContainer
+              center={getMapCenter()}
+              zoom={13}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <HeatmapLayer
+                fitBoundsOnLoad
+                points={getHeatmapPoints()}
+                options={{ radius: 30, blur: 15, maxZoom: 17 }}
+              />
+            </MapContainer>
+          </Box>
         </Paper>
 
         <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 2, mt: 4 }}>
