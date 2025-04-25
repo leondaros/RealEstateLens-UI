@@ -11,24 +11,9 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import SecurityIcon from "@mui/icons-material/Security";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { MapContainer, TileLayer, Polygon, useMap } from "react-leaflet";
+import { getLatLngsFromGeometry } from "../utils/geometryUtils";
 import wellknown from "wellknown";
 import { useNavigate } from "react-router-dom";
-
-function getLatLngsFromGeometry(geometry) {
-  if (!geometry) return [];
-  const parsed = wellknown.parse(geometry);
-  if (!parsed) return [];
-  if (parsed.type === "Polygon") {
-    return parsed.coordinates.map((ring) =>
-      ring.map(([lng, lat]) => [lat, lng])
-    );
-  } else if (parsed.type === "MultiPolygon") {
-    return parsed.coordinates.map((poly) =>
-      poly.map((ring) => ring.map(([lng, lat]) => [lat, lng]))
-    );
-  }
-  return [];
-}
 
 function getPolygonBounds(latlngs) {
   const allCoords = latlngs.flat(2);

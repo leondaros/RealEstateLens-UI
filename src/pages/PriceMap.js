@@ -16,22 +16,25 @@ import {
 } from '@mui/material';
 import wellknown from "wellknown";
 import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
-
-function getLatLngsFromGeometry(geometry) {
-  if (!geometry) return [];
-  const parsed = wellknown.parse(geometry);
-  if (!parsed) return [];
-  if (parsed.type === "Polygon") {
-    return parsed.coordinates.map(ring => ring.map(([lng, lat]) => [lat, lng]));
-  } else if (parsed.type === "MultiPolygon") {
-    return parsed.coordinates.flatMap(poly =>
-      poly.map(ring => ring.map(([lng, lat]) => [lat, lng]))
-    );
-  }
-  return [];
-}
+import { getLatLngsFromGeometry } from "../utils/geometryUtils";
 
 function getSublocationStats(sub_locations, propertyType, priceRange) {
+  return sub_locations.map(subloc => {
+    const count = subloc.average_price || 0;
+    return { ...subloc, count };
+  });
+}
+
+function getPercentileBreaks(values, percentiles) {
+  if (!values.length) return [];
+  const sorted = [...values].sort((a, b) => a - b);
+  return percentiles.map(p => {
+    const idx = Math.floor(p * (sorted.length - 1));
+    return sorted[idx];
+  });
+}
+
+function getSublocationPropertyCount(sub_locations, propertyType, priceRange) {
   return sub_locations.map(subloc => {
     const count = (subloc.properties || []).filter(prop => {
       const matchesType = propertyType === 'all' || prop.type === propertyType;
@@ -49,39 +52,16 @@ function getColor(value, breaks, colors) {
   return colors[colors.length - 1];
 }
 
-const MapPlaceholder = () => (
-  <Box 
-    sx={{ 
-      height: 500, 
-      backgroundColor: '#e0e0e0',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'hidden'
-    }}
-  >
-    <Box sx={{ position: 'absolute', width: '100%', height: '100%' }}>
-      <Box sx={{ position: 'absolute', top: '20%', left: '10%', width: '25%', height: '30%', backgroundColor: '#3f51b5', opacity: 0.4, borderRadius: 2 }} />
-      <Box sx={{ position: 'absolute', top: '15%', left: '40%', width: '20%', height: '40%', backgroundColor: '#673ab7', opacity: 0.5, borderRadius: 2 }} />
-      <Box sx={{ position: 'absolute', top: '60%', left: '15%', width: '30%', height: '25%', backgroundColor: '#2196f3', opacity: 0.3, borderRadius: 2 }} />
-      <Box sx={{ position: 'absolute', top: '30%', left: '65%', width: '25%', height: '50%', backgroundColor: '#f44336', opacity: 0.4, borderRadius: 2 }} />
-      <Box sx={{ position: 'absolute', top: '10%', right: '10%', width: '15%', height: '15%', backgroundColor: '#ff9800', opacity: 0.5, borderRadius: 2 }} />
-      <Box sx={{ position: 'absolute', bottom: '10%', right: '20%', width: '30%', height: '20%', backgroundColor: '#4caf50', opacity: 0.4, borderRadius: 2 }} />
-    </Box>
-    <Typography variant="h6" color="text.secondary" sx={{ zIndex: 1 }}>
-      Mapa de Preços por Bairro
-    </Typography>
-  </Box>
-);
-
 function PriceMap({ locationId, locationData, sub_locations }) {
   const [priceRange, setPriceRange] = useState([0, 200000000000]);
   const [propertyType, setPropertyType] = useState('all');
 
   const stats = getSublocationStats(sub_locations, propertyType, priceRange);
   const counts = stats.map(s => s.count);
-  const breaks = [5, 10, 20, 40]; // Example breaks
+
+  // Define percentiles you want (e.g., quartiles: 20%, 40%, 60%, 80%)
+  const percentiles = [0.2, 0.4, 0.6, 0.8];
+  const breaks = getPercentileBreaks(counts, percentiles);
   const colors = ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'];
 
   const handlePriceChange = (event, newValue) => {
@@ -149,6 +129,7 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                   : [-28.0278, -48.6192] // fallback default
               }
               zoom={13}
+              minZoom={11}
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -161,9 +142,16 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                     positions={latlngs}
                     pathOptions={{ fillColor: color, color: "#333", weight: 2, fillOpacity: 0.7 }}
                   >
-                    <Tooltip>
-                      {subloc.name}: {subloc.count} imóveis
-                    </Tooltip>
+                      <Tooltip direction="top" offset={[0, 10]}>
+                        <div style={{ fontSize: '1.1rem', minWidth: 120 }}>
+                          <strong>{subloc.name}</strong>
+                          <br />
+                          Preço médio:&nbsp;
+                          <span style={{ fontWeight: 600, color: '#1976d2' }}>
+                            R$ {Number(subloc.count).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      </Tooltip>
                   </Polygon>
                 );
               })}

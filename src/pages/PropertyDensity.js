@@ -20,8 +20,22 @@ import {
   TableRow,
   Chip
 } from '@mui/material';
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
 import HeatmapLayer from "../components/HeatmapLayer";
+import { getLatLngsFromGeometry } from "../utils/geometryUtils";
+import wellknown from "wellknown";
+
+// Helper to parse "SRID=4326;POINT (lng lat)" to [lat, lng]
+function parsePointWKT(pointStr) {
+  if (!pointStr || typeof pointStr !== "string") return null;
+  // Remove SRID if present
+  const match = pointStr.match(/POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i);
+  if (!match) return null;
+  const lng = parseFloat(match[1]);
+  const lat = parseFloat(match[2]);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  return [lat, lng];
+}
 
 function PropertyDensity({ id, locationData, sub_locations }) {
   const [propertyType, setPropertyType] = useState('all');
@@ -34,18 +48,6 @@ function PropertyDensity({ id, locationData, sub_locations }) {
   const handleTimeRangeChange = (event) => {
     setTimeRange(event.target.value);
   };
-
-  // Helper to parse "SRID=4326;POINT (lng lat)" to [lat, lng]
-  function parsePointWKT(pointStr) {
-    if (!pointStr || typeof pointStr !== "string") return null;
-    // Remove SRID if present
-    const match = pointStr.match(/POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i);
-    if (!match) return null;
-    const lng = parseFloat(match[1]);
-    const lat = parseFloat(match[2]);
-    if (isNaN(lat) || isNaN(lng)) return null;
-    return [lat, lng];
-  }
 
   // Collect all property points from sublocations
   const getHeatmapPoints = () => {
@@ -145,6 +147,29 @@ function PropertyDensity({ id, locationData, sub_locations }) {
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {/* Outline sublocations */}
+              {sub_locations && sub_locations.map((subloc, idx) => {
+                const latlngs = getLatLngsFromGeometry(subloc.geometry);
+                if (!latlngs.length) return null;
+                return (
+                  <Polygon
+                    key={subloc.id || idx}
+                    positions={latlngs}
+                    pathOptions={{
+                      fillOpacity: 0,
+                      color: "#1976d2",
+                      weight: 2,
+                      dashArray: "4"
+                    }}
+                  >
+                    <Tooltip direction="top" offset={[0, 10]}>
+                      <div style={{ fontSize: '1.1rem', minWidth: 120 }}>
+                        <strong>{subloc.name}</strong>
+                      </div>
+                    </Tooltip>
+                  </Polygon>
+                );
+              })}
               <HeatmapLayer
                 fitBoundsOnLoad
                 points={getHeatmapPoints()}
