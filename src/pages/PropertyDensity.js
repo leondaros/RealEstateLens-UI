@@ -173,7 +173,7 @@ function PropertyDensity({ id, locationData, sub_locations }) {
               <HeatmapLayer
                 fitBoundsOnLoad
                 points={getHeatmapPoints()}
-                options={{ radius: 30, blur: 15, maxZoom: 17 }}
+                options={{ radius: 80, blur: 15, maxZoom: 17 }}
               />
             </MapContainer>
           </Box>

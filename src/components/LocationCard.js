@@ -16,7 +16,7 @@ import wellknown from "wellknown";
 import { useNavigate } from "react-router-dom";
 
 function getPolygonBounds(latlngs) {
-  const allCoords = latlngs.flat(2);
+  const allCoords = latlngs.flat(2).filter(coord => Array.isArray(coord) && coord.length === 2);
   let minLat = 90,
     minLng = 180,
     maxLat = -90,
