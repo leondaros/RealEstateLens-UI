@@ -11,12 +11,6 @@ const MainAppBar = ({ locationName = 'Garopaba' }) => {
         <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: '1.75rem' }}>
           {locationName}
         </Typography>
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-          <Button color="inherit" onClick={() => navigate('/location')}>Dashboard</Button>
-          <Button color="inherit" onClick={() => navigate('/location/prices')}>Preços</Button>
-          <Button color="inherit" onClick={() => navigate('/location/density')}>Densidade</Button>
-          <Button color="inherit" onClick={() => navigate('/feedback')}>Contribuir</Button>
-        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button variant="outlined" color="inherit" sx={{ borderRadius: 2 }}>
             Sign in

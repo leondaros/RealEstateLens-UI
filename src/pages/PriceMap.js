@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { MapContainer, TileLayer, Polygon, Tooltip, useMap } from "react-leaflet";
 import { getLatLngsFromGeometry, getPolygonBounds, FitBounds } from "../utils/geometryUtils";
+import MapLegend from '../components/MapLegend';
 
 function getSublocationStats(locationData, sub_locations, propertyType, priceRange) {
   const test = sub_locations!=0 ? sub_locations: [locationData];
@@ -142,6 +143,7 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                   </Polygon>
                 );
               })}
+              <MapLegend breaks={breaks} colors={colors} title="Preço Médio"/>
             </MapContainer>
           </Box>
         </Paper>
