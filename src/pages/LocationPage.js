@@ -2,11 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Container,
   Box,
-  Grid,
-  Card,
-  CardContent,
-  CardActionArea,
-  Typography,
   Tabs,
   Tab,
   Paper,
@@ -17,7 +12,7 @@ import LocationStats from "../components/LocationStats";
 import LocationReviews from "../components/LocationReviews";
 import MainAppBar from "../components/MainAppBar";
 import { getLocationSubLocations, getLocationbyId } from "../services/Api";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import MapIcon from '@mui/icons-material/Map';
 import LayersIcon from '@mui/icons-material/Layers';
 import InfoIcon from '@mui/icons-material/Info';
@@ -27,34 +22,32 @@ import PropertyDensity from "./PropertyDensity";
 const LocationPage = () => {
   const { id } = useParams();
   const location = useLocation();
-  const [locationData, setLocationData] = useState(location.state);
-  const [loading, setLoading] = useState(!locationData);
+  // Always use navigation state if present, otherwise null
+  const [locationData, setLocationData] = useState(location.state || null);
+  const [loading, setLoading] = useState(!location.state);
   const [locations, setLocations] = useState([]);
   const [tab, setTab] = useState(0);
-  const navigate = useNavigate();
 
   useEffect(() => {
+    // If navigation state is present, use it and never overwrite
     if (location.state) {
       setLocationData(location.state);
       setLoading(false);
+      return;
     }
-  }, [location.state]);
-
-  useEffect(() => {
+    // Otherwise, fetch from backend
     const fetchData = async () => {
-      if (!locationData) {
-        try {
-          const response = await getLocationbyId(id);
-          setLocationData(response);
-          setLoading(false);
-        } catch (error) {
-          console.error("Error fetching location data:", error);
-          setLoading(false);
-        }
+      try {
+        const response = await getLocationbyId(id);
+        setLocationData(response);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching location data:", error);
+        setLoading(false);
       }
     };
     fetchData();
-  }, [id, locationData]);
+  }, [id, location.state]);
 
   useEffect(() => {
     const fetchLocations = async () => {

@@ -10,38 +10,13 @@ import {
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import SecurityIcon from "@mui/icons-material/Security";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { MapContainer, TileLayer, Polygon, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon } from "react-leaflet";
 import { getLatLngsFromGeometry } from "../utils/geometryUtils";
-import wellknown from "wellknown";
 import { useNavigate } from "react-router-dom";
+import { getPolygonBounds, FitBounds } from "../utils/geometryUtils";
 
-function getPolygonBounds(latlngs) {
-  const allCoords = latlngs.flat(2).filter(coord => Array.isArray(coord) && coord.length === 2);
-  let minLat = 90,
-    minLng = 180,
-    maxLat = -90,
-    maxLng = -180;
-  allCoords.forEach(([lat, lng]) => {
-    minLat = Math.min(minLat, lat);
-    minLng = Math.min(minLng, lng);
-    maxLat = Math.max(maxLat, lat);
-    maxLng = Math.max(maxLng, lng);
-  });
-  return [
-    [minLat, minLng],
-    [maxLat, maxLng],
-  ];
-}
-
-function FitBounds({ bounds }) {
-  const map = useMap();
-  React.useEffect(() => {
-    if (bounds) map.fitBounds(bounds, { padding: [20, 20] });
-  }, [map, bounds]);
-  return null;
-}
-
-const LocationCard = ({ id, name, rating, safety, average_price, geometry }) => {
+const LocationCard = (props) => {
+  const { id, name, rating, safety, average_price, geometry } = props;
   const latlngs = getLatLngsFromGeometry(geometry);
   const bounds = latlngs.length ? getPolygonBounds(latlngs) : null;
   const navigate = useNavigate();
@@ -49,20 +24,17 @@ const LocationCard = ({ id, name, rating, safety, average_price, geometry }) => 
   const handleCardClick = () => {
     navigate(`/location/${id}`, { 
       state: { 
-        name,
-        rating,
-        safety,
-        average_price,
-        geometry
+        ...props
       }
     });
   };
 
   return (
-    <Card sx={{ borderRadius: 2, boxShadow: 4, overflow: 'hidden' }}>
+    <Card sx={{ borderRadius: 2, boxShadow: 4, overflow: 'hidden', height: 300 }}>
       <CardActionArea onClick={handleCardClick}>
         <Box sx={{ height: 200, width: '100%', position: 'relative' }}>
           <MapContainer
+            key={JSON.stringify(bounds)}
             bounds={bounds}
             scrollWheelZoom={false}
             doubleClickZoom={false}
@@ -72,7 +44,7 @@ const LocationCard = ({ id, name, rating, safety, average_price, geometry }) => 
             style={{ height: '100%', width: '100%' }}
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {bounds && <FitBounds bounds={bounds} />}
+            {bounds && <FitBounds bounds={bounds} options={{ padding: [0, 0] }}/>}
             {latlngs.map((polygon, i) => (
               <Polygon
                 key={i}

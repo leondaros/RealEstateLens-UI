@@ -1,7 +1,39 @@
 .App {
   text-align: center;
+  font-family: 'Inter', 'Roboto', 'Open Sans', Arial, sans-serif;
+  background: #f7f9fb;
+  min-height: 100vh;
 }
 
+/* Card hover effect for MUI cards */
+.MuiCard-root {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.MuiCard-root:hover {
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.15);
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* Map container style */
+.leaflet-container {
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .App-header {
+    font-size: 18px;
+    padding: 16px;
+  }
+  .MuiCard-root {
+    margin: 12px 0;
+  }
+}
+
+/* Existing styles below */
 .App-logo {
   height: 40vmin;
   pointer-events: none;

@@ -21,8 +21,11 @@ const LocationsList = ({ locations }) => (
           xs={12}
           sm={6}
           md={4}
+          sx={{ display: "flex", justifyContent: "center" }}
         >
-          <LocationCard {...location} />
+          <Box sx={{ width: 300 }}>
+            <LocationCard {...location} />
+          </Box>
         </Grid>
       ))}
     </Grid>

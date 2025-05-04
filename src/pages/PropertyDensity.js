@@ -4,7 +4,6 @@ import {
   Container, 
   Typography, 
   Paper, 
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -22,8 +21,8 @@ import {
 } from '@mui/material';
 import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
 import HeatmapLayer from "../components/HeatmapLayer";
-import { getLatLngsFromGeometry } from "../utils/geometryUtils";
-import wellknown from "wellknown";
+import { getLatLngsFromGeometry, getPolygonBounds, FitBounds } from "../utils/geometryUtils";
+
 
 // Helper to parse "SRID=4326;POINT (lng lat)" to [lat, lng]
 function parsePointWKT(pointStr) {
@@ -40,6 +39,13 @@ function parsePointWKT(pointStr) {
 function PropertyDensity({ id, locationData, sub_locations }) {
   const [propertyType, setPropertyType] = useState('all');
   const [timeRange, setTimeRange] = useState('3m');
+  const latlngs = getLatLngsFromGeometry(locationData.geometry);
+  const bounds = latlngs.length ? getPolygonBounds(latlngs) : null;
+
+  // Use sub_locations if present and non-empty, otherwise fallback to [locationData]
+  const sublocs = (sub_locations && Array.isArray(sub_locations) && sub_locations.length > 0)
+    ? sub_locations
+    : (locationData ? [locationData] : []);
 
   const handlePropertyTypeChange = (event) => {
     setPropertyType(event.target.value);
@@ -49,18 +55,15 @@ function PropertyDensity({ id, locationData, sub_locations }) {
     setTimeRange(event.target.value);
   };
 
-  // Collect all property points from sublocations
+  // Collect all property points from sublocations or locationData
   const getHeatmapPoints = () => {
-    if (!locationData || !sub_locations){
-      console.log(locationData)
-      console.log(sub_locations) 
+    if (!locationData && sublocs.length === 0) {
       return [];
     }
     let points = [];
-    sub_locations.forEach((subloc) => {
-      if (subloc.properties && Array.isArray(subloc.properties)) {
+    sublocs.forEach((subloc) => {
+      if (subloc && subloc.properties && Array.isArray(subloc.properties)) {
         subloc.properties.forEach((prop) => {
-          console.log(prop);
           if (propertyType === 'all' || prop.type === propertyType) {
             // Try to get coordinates from Point WKT string
             if (prop.coordinates) {
@@ -79,13 +82,6 @@ function PropertyDensity({ id, locationData, sub_locations }) {
       }
     });
     return points;
-  };
-
-  const getMapCenter = () => {
-    if (locationData && locationData.center_lat && locationData.center_lng) {
-      return [locationData.center_lat, locationData.center_lng];
-    }
-    return [-28.0278, -48.6192];
   };
 
   const densityData = [
@@ -142,13 +138,14 @@ function PropertyDensity({ id, locationData, sub_locations }) {
         <Paper sx={{ mb: 3, overflow: 'hidden' }}>
           <Box sx={{ height: 500, width: "100%" }}>
             <MapContainer
-              center={getMapCenter()}
-              zoom={13}
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              {/* Outline sublocations */}
-              {sub_locations && sub_locations.map((subloc, idx) => {
+              {bounds && (
+                <FitBounds bounds={bounds} options={{ padding: [0,0] }} />
+              )}
+              {/* Outline sublocations or locationData */}
+              {sublocs.map((subloc, idx) => {
                 const latlngs = getLatLngsFromGeometry(subloc.geometry);
                 if (!latlngs.length) return null;
                 return (

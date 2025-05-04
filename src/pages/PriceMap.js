@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Container, 
   Typography, 
   Paper, 
-  Button,
   Slider,
   FormControl,
   InputLabel,
@@ -14,12 +13,12 @@ import {
   Card,
   CardContent
 } from '@mui/material';
-import wellknown from "wellknown";
-import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
-import { getLatLngsFromGeometry } from "../utils/geometryUtils";
+import { MapContainer, TileLayer, Polygon, Tooltip, useMap } from "react-leaflet";
+import { getLatLngsFromGeometry, getPolygonBounds, FitBounds } from "../utils/geometryUtils";
 
-function getSublocationStats(sub_locations, propertyType, priceRange) {
-  return sub_locations.map(subloc => {
+function getSublocationStats(locationData, sub_locations, propertyType, priceRange) {
+  const test = sub_locations!=0 ? sub_locations: [locationData];
+  return test.map(subloc => {
     const count = subloc.average_price || 0;
     return { ...subloc, count };
   });
@@ -34,17 +33,6 @@ function getPercentileBreaks(values, percentiles) {
   });
 }
 
-function getSublocationPropertyCount(sub_locations, propertyType, priceRange) {
-  return sub_locations.map(subloc => {
-    const count = (subloc.properties || []).filter(prop => {
-      const matchesType = propertyType === 'all' || prop.type === propertyType;
-      const matchesPrice = !priceRange || (prop.price >= priceRange[0] && prop.price <= priceRange[1]);
-      return matchesType && matchesPrice;
-    }).length;
-    return { ...subloc, count };
-  });
-}
-
 function getColor(value, breaks, colors) {
   for (let i = 0; i < breaks.length; i++) {
     if (value <= breaks[i]) return colors[i];
@@ -55,9 +43,10 @@ function getColor(value, breaks, colors) {
 function PriceMap({ locationId, locationData, sub_locations }) {
   const [priceRange, setPriceRange] = useState([0, 200000000000]);
   const [propertyType, setPropertyType] = useState('all');
-
-  const stats = getSublocationStats(sub_locations, propertyType, priceRange);
+  const stats = getSublocationStats(locationData, sub_locations, propertyType, priceRange);
   const counts = stats.map(s => s.count);
+  const latlngs = getLatLngsFromGeometry(locationData.geometry);
+  const bounds = latlngs.length ? getPolygonBounds(latlngs) : null;
 
   // Define percentiles you want (e.g., quartiles: 20%, 40%, 60%, 80%)
   const percentiles = [0.2, 0.4, 0.6, 0.8];
@@ -123,16 +112,14 @@ function PriceMap({ locationId, locationData, sub_locations }) {
         <Paper sx={{ mb: 3, overflow: 'hidden' }}>
           <Box sx={{ height: 500, width: "100%" }}>
             <MapContainer
-              center={
-                locationData && locationData.center_lat && locationData.center_lng
-                  ? [locationData.center_lat, locationData.center_lng]
-                  : [-28.0278, -48.6192] // fallback default
-              }
-              zoom={13}
-              minZoom={11}
-              style={{ height: "100%", width: "100%" }}
+              key={JSON.stringify(bounds)}
+              style={{ height: '100%', width: '100%' }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {bounds && (
+                // Example: force new bounds reference
+                <FitBounds bounds={[...bounds]} options={{ padding: [0,0]}} />
+              )}
               {stats.map((subloc, idx) => {
                 const latlngs = getLatLngsFromGeometry(subloc.geometry);
                 const color = getColor(subloc.count, breaks, colors);
