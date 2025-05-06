@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Container, 
@@ -7,9 +7,13 @@ import {
   Button, 
   Grid, 
   Card, 
-  CardContent 
+  CardContent,
+  Autocomplete,
+  CircularProgress
 } from '@mui/material';
 import MainAppBar from '../components/MainAppBar';
+import { getLocationByName } from '../services/Api';
+import { useNavigate } from 'react-router-dom';
 
 // Sample data - replace with API or context-driven data
 const popularLocations = ['New York, NY', 'San Francisco, CA', 'Austin, TX', 'Miami, FL'];
@@ -17,12 +21,34 @@ const greenCities = ['Portland, OR', 'Copenhagen, Denmark', 'Vancouver, Canada',
 const favoriteLocations = ['Seattle, WA', 'Denver, CO', 'Boston, MA'];
 
 export default function HomePage() {
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    const query = data.get('search');
-    // TODO: connect search handler to your routing or API
-    console.log('Search for:', query);
+  const [searchInput, setSearchInput] = useState('');
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const navigate = useNavigate();
+
+  const handleSearchInputChange = async (event, value, reason) => {
+    setSearchInput(value);
+    setSelectedLocation(null);
+    if (value && value.length >= 3) {
+      setLoading(true);
+      try {
+        const results = await getLocationByName(value);
+        setOptions(results || []);
+      } catch (e) {
+        setOptions([]);
+      }
+      setLoading(false);
+    } else {
+      setOptions([]);
+    }
+  };
+
+  const handleLocationSelect = (event, value) => {
+    setSelectedLocation(value);
+    if (value && value.id) {
+      navigate(`/location/${value.id}`, { state: value });
+    }
   };
 
   return (
@@ -37,14 +63,43 @@ export default function HomePage() {
           <Typography variant="h6" color="textSecondary" gutterBottom>
             Discover locations you love or search for new areas.
           </Typography>
-          <Box component="form" onSubmit={handleSearch} sx={{ display: 'flex', mt: 4 }}>
-            <TextField
-              name="search"
-              placeholder="Enter city, neighborhood, or ZIP code"
+          <Box sx={{ display: 'flex', mt: 4 }}>
+            <Autocomplete
+              freeSolo
               fullWidth
-              variant="outlined"
+              loading={loading}
+              options={options}
+              getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
+              inputValue={searchInput}
+              onInputChange={handleSearchInputChange}
+              onChange={handleLocationSelect}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Enter city, neighborhood, or ZIP code"
+                  variant="outlined"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
             />
-            <Button type="submit" variant="contained" sx={{ ml: 2 }}>
+            <Button 
+              variant="contained" 
+              sx={{ ml: 2 }}
+              disabled={!selectedLocation}
+              onClick={() => {
+                if (selectedLocation && selectedLocation.id) {
+                  navigate(`/location/${selectedLocation.id}`, { state: selectedLocation });
+                }
+              }}
+            >
               Search
             </Button>
           </Box>

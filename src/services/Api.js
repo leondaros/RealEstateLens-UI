@@ -24,6 +24,12 @@ export async function getLocationSubLocations(id) {
     return res.json();
 }
 
+export async function getLocationByName(name) {
+    const res = await fetch(`${API_URL}/locations/search/?q=${name}`);
+    if (!res.ok) throw new Error('Erro ao buscar dados');
+    return res.json();
+}
+
 export async function getProperties() {
     const res = await fetch(`${API_URL}/properties/`);
     if (!res.ok) throw new Error('Erro ao buscar dados');
