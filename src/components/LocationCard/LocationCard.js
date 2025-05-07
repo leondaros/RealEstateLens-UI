@@ -11,9 +11,9 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import SecurityIcon from "@mui/icons-material/Security";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { MapContainer, TileLayer, Polygon } from "react-leaflet";
-import { getLatLngsFromGeometry } from "../utils/geometryUtils";
 import { useNavigate } from "react-router-dom";
-import { getPolygonBounds, FitBounds } from "../utils/geometryUtils";
+import { getPolygonBounds, FitBounds, getLatLngsFromGeometry } from "../../utils/geometryUtils";
+import "./LocationCard.css";
 
 const LocationCard = (props) => {
   const { id, name, rating, safety, average_price, geometry } = props;
@@ -61,7 +61,7 @@ const LocationCard = (props) => {
           </MapContainer>
         </Box>
         <CardContent>
-          <Typography variant="h6" align="center" gutterBottom>
+          <Typography className="card-title" variant="h6" align="center" gutterBottom>
             {name}
           </Typography>
           <Stack direction="row" spacing={3} justifyContent="center">

@@ -47,13 +47,13 @@ export default function HomePage() {
   const handleLocationSelect = (event, value) => {
     setSelectedLocation(value);
     if (value && value.id) {
-      navigate(`/location/${value.id}`, { state: value });
+      navigate(`/location/${value.id}`);
     }
   };
 
   return (
     <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh' }}>
-      <MainAppBar locationName={'RealStateLens'} />
+      <MainAppBar locationName={'RealEstateLens'} />
       {/* Hero Section */}
       <Box component="section" sx={{ bgcolor: 'common.white', py: 8 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
@@ -121,56 +121,6 @@ export default function HomePage() {
                       {loc}
                     </Typography>
                     <Button size="small">View Details</Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Most Researched Section */}
-      <Box component="section" sx={{ py: 6 }}>
-        <Container>
-          <Typography variant="h4" component="h2" gutterBottom>
-            Most Researched Locations
-          </Typography>
-          <Grid container spacing={4}>
-            {popularLocations.map((loc) => (
-              <Grid item xs={12} sm={6} md={3} key={loc}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {loc}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Popular searches in {loc}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Most Green Cities Section */}
-      <Box component="section" sx={{ py: 6, bgcolor: 'common.white' }}>
-        <Container>
-          <Typography variant="h4" component="h2" gutterBottom>
-            Top Green Cities
-          </Typography>
-          <Grid container spacing={4}>
-            {greenCities.map((city) => (
-              <Grid item xs={12} sm={6} md={3} key={city}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {city}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Known for sustainability and green living
-                    </Typography>
                   </CardContent>
                 </Card>
               </Grid>

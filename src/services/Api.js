@@ -18,8 +18,8 @@ export async function getLocationProperties(id) {
     return res.json();
 }
 
-export async function getLocationSubLocations(id) {
-    const res = await fetch(`${API_URL}/locations/${id}/sub_locations/`);
+export async function getLocationDetails(id) {
+    const res = await fetch(`${API_URL}/locations/${id}/details/`);
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }

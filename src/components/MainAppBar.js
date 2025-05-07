@@ -8,7 +8,16 @@ const MainAppBar = ({ locationName = 'Garopaba' }) => {
   return (
     <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', fontSize: '1.75rem' }}>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          onClick={() => navigate('/')}
+          sx={{ 
+            fontWeight: 'bold', 
+            fontSize: '1.75rem',
+            cursor: 'pointer'
+          }}
+        >
           {locationName}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>

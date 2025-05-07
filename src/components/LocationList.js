@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Typography, Grid, Box } from "@mui/material";
-import LocationCard from "./LocationCard";
+import LocationCard from "./LocationCard/LocationCard";
 
 const LocationsList = ({ locations }) => (
   <Container maxWidth="lg" sx={{ py: 4 }}>

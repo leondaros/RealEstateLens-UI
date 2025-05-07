@@ -1,0 +1,6 @@
+.card-title {
+    white-space: nowrap;        /* não quebra em múltiplas linhas */
+    overflow: hidden;           /* esconde o que ultrapassar a caixa */
+    text-overflow: ellipsis;    /* adiciona “…” no final */
+  }
+  

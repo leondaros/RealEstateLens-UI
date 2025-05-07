@@ -11,7 +11,7 @@ import LocationsList from "../components/LocationList";
 import LocationStats from "../components/LocationStats";
 import LocationReviews from "../components/LocationReviews";
 import MainAppBar from "../components/MainAppBar";
-import { getLocationSubLocations, getLocationbyId } from "../services/Api";
+import { getLocationDetails } from "../services/Api";
 import { useLocation, useParams } from "react-router-dom";
 import MapIcon from '@mui/icons-material/Map';
 import LayersIcon from '@mui/icons-material/Layers';
@@ -25,7 +25,6 @@ const LocationPage = () => {
   // Always use navigation state if present, otherwise null
   const [locationData, setLocationData] = useState(location.state || null);
   const [loading, setLoading] = useState(!location.state);
-  const [locations, setLocations] = useState([]);
   const [tab, setTab] = useState(0);
 
   useEffect(() => {
@@ -35,10 +34,10 @@ const LocationPage = () => {
       setLoading(false);
       return;
     }
-    // Otherwise, fetch from backend
+    // Otherwise, fetch from backend using getLocationDetails only
     const fetchData = async () => {
       try {
-        const response = await getLocationbyId(id);
+        const response = await getLocationDetails(id);
         setLocationData(response);
         setLoading(false);
       } catch (error) {
@@ -48,20 +47,6 @@ const LocationPage = () => {
     };
     fetchData();
   }, [id, location.state]);
-
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const response = await getLocationSubLocations(id);
-        setLocations(response);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      }
-    };
-    if (id) {
-      fetchLocations();
-    }
-  }, [id]);
 
   if (!locationData) {
     return <div>Loading...</div>;
@@ -73,7 +58,7 @@ const LocationPage = () => {
 
   return (
     <Box>
-      <MainAppBar locationName={locationData.name} />
+      <MainAppBar locationName={'RealEstateLens'} />
       <HeroSection name={locationData.name} />
       <Container maxWidth="lg">
         <Paper sx={{ mb: 3 }}>
@@ -99,18 +84,18 @@ const LocationPage = () => {
               average_price={locationData.average_price}
             />
             <LocationReviews />
-            {locations && locations.sub_locations && locations.sub_locations.length > 0 && (
-              <LocationsList locations={locations} />
+            {locationData && locationData.sub_locations && locationData.sub_locations.length > 0 && (
+              <LocationsList locations={locationData} />
             )}
           </>
         )}
 
         {tab === 1 && (
-          <PriceMap locationId={id} locationData={locationData} sub_locations={locations.sub_locations} />
+          <PriceMap locationId={id} locationData={locationData} sub_locations={locationData.sub_locations} />
         )}
 
         {tab === 2 && (
-          <PropertyDensity locationId={id} locationData={locationData} sub_locations={locations.sub_locations}/>
+          <PropertyDensity locationId={id} locationData={locationData} sub_locations={locationData.sub_locations}/>
         )}
       </Container>
     </Box>
