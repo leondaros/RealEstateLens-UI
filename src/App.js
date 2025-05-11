@@ -16,7 +16,7 @@ function App() {
         <Route path="/location/:id" element={<LocationPage/>} />
         <Route path="/location/:id/prices" element={<PriceMap />} />
         <Route path="/location/:id/density" element={<PropertyDensity />} />
-        <Route path="/feedback" element={<UserContribution />} />
+        <Route path="/location/:id/contribution" element={<UserContribution />} />
       </Routes>
     </BrowserRouter>
   );

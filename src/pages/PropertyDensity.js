@@ -84,14 +84,6 @@ function PropertyDensity({ id, locationData, sub_locations }) {
     return points;
   };
 
-  const densityData = [
-    { neighborhood: 'Centro', totalListings: 47, newListings: 12, trend: 'up' },
-    { neighborhood: 'Gamboa', totalListings: 36, newListings: 8, trend: 'up' },
-    { neighborhood: 'Ferrugem', totalListings: 28, newListings: 5, trend: 'down' },
-    { neighborhood: 'Silveira', totalListings: 34, newListings: 9, trend: 'stable' },
-    { neighborhood: 'Vigia', totalListings: 23, newListings: 6, trend: 'up' },
-  ];
-
   return (
     <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -102,7 +94,7 @@ function PropertyDensity({ id, locationData, sub_locations }) {
         <Paper sx={{ p: 3, mb: 3 }}>
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+              <FormControl fullWidth sx={{ minWidth: 200 }}>
                 <InputLabel>Tipo de Imóvel</InputLabel>
                 <Select
                   value={propertyType}
@@ -175,91 +167,6 @@ function PropertyDensity({ id, locationData, sub_locations }) {
             </MapContainer>
           </Box>
         </Paper>
-
-        <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 2, mt: 4 }}>
-          Concentração de Imóveis por Bairro
-        </Typography>
-
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Bairro</TableCell>
-                <TableCell align="right">Total de Imóveis</TableCell>
-                <TableCell align="right">Novos Anúncios</TableCell>
-                <TableCell align="right">Tendência</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {densityData.map((row) => (
-                <TableRow key={row.neighborhood}>
-                  <TableCell>{row.neighborhood}</TableCell>
-                  <TableCell align="right">{row.totalListings}</TableCell>
-                  <TableCell align="right">{row.newListings}</TableCell>
-                  <TableCell align="right">
-                    <Chip 
-                      label={row.trend === 'up' ? 'Em alta' : row.trend === 'down' ? 'Em queda' : 'Estável'} 
-                      color={row.trend === 'up' ? 'success' : row.trend === 'down' ? 'error' : 'primary'} 
-                      size="small"
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 2, mt: 4 }}>
-          Insights para Corretores
-        </Typography>
-
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                  Oportunidades de Marketing
-                </Typography>
-                <Typography variant="body2" paragraph>
-                  O bairro Centro apresenta a maior concentração de novos anúncios, indicando uma alta atividade de mercado.
-                </Typography>
-                <Typography variant="body2">
-                  Recomendação: Considere campanhas publicitárias localizadas nesta região para maximizar a visibilidade.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                  Áreas em Expansão
-                </Typography>
-                <Typography variant="body2" paragraph>
-                  Gamboa e Vigia mostram tendência de crescimento constante nos últimos {timeRange === '1m' ? 'mês' : timeRange === '3m' ? '3 meses' : timeRange === '6m' ? '6 meses' : 'ano'}.
-                </Typography>
-                <Typography variant="body2">
-                  Recomendação: Busque novas listagens nestas áreas para aproveitar o interesse crescente.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                  Análise de Temporalidade
-                </Typography>
-                <Typography variant="body2" paragraph>
-                  Os dados indicam um aumento de 18% na atividade de mercado em comparação com o mesmo período do ano anterior.
-                </Typography>
-                <Typography variant="body2">
-                  Recomendação: Antecipe-se ao crescimento sazonal com estratégias proativas de captação.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
       </Container>
     </div>
   );

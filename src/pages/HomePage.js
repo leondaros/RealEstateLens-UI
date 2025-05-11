@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  TextField, 
-  Button, 
-  Grid, 
-  Card, 
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Card,
   CardContent,
   Autocomplete,
   CircularProgress
@@ -14,17 +14,20 @@ import {
 import MainAppBar from '../components/MainAppBar';
 import { getLocationByName } from '../services/Api';
 import { useNavigate } from 'react-router-dom';
+import { addToRecentLocations } from '../utils/locationUtils';
 
 // Sample data - replace with API or context-driven data
 const popularLocations = ['New York, NY', 'San Francisco, CA', 'Austin, TX', 'Miami, FL'];
 const greenCities = ['Portland, OR', 'Copenhagen, Denmark', 'Vancouver, Canada', 'Amsterdam, NL'];
-const favoriteLocations = ['Seattle, WA', 'Denver, CO', 'Boston, MA'];
+const favoriteLocations = [];
 
 export default function HomePage() {
   const [searchInput, setSearchInput] = useState('');
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [recentLocations, setRecentLocations] = useState([]);
+
   const navigate = useNavigate();
 
   const handleSearchInputChange = async (event, value, reason) => {
@@ -47,9 +50,41 @@ export default function HomePage() {
   const handleLocationSelect = (event, value) => {
     setSelectedLocation(value);
     if (value && value.id) {
+      const updatedRecent = addToRecentLocations(value);
+      setRecentLocations(updatedRecent);
       navigate(`/location/${value.id}`);
     }
   };
+
+  // Add this useEffect to load recent locations when component mounts
+  useEffect(() => {
+    const loadRecentLocations = () => {
+      try {
+        const stored = localStorage.getItem('recentLocations');
+        if (stored) {
+          const recent = JSON.parse(stored);
+          setRecentLocations(recent);
+        }
+      } catch (error) {
+        console.warn('Failed to load recent locations:', error);
+        setRecentLocations([]);
+      }
+    };
+
+    // Load initial data
+    loadRecentLocations();
+
+    // Update on navigation and tab focus
+    window.addEventListener('popstate', loadRecentLocations);
+    window.addEventListener('focus', loadRecentLocations);
+
+    // Cleanup listeners
+    return () => {
+      window.removeEventListener('popstate', loadRecentLocations);
+      window.removeEventListener('focus', loadRecentLocations);
+    };
+  }, []); // Empty dependency array since we want this to run only once on mount
+
 
   return (
     <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh' }}>
@@ -90,8 +125,8 @@ export default function HomePage() {
                 />
               )}
             />
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ ml: 2 }}
               disabled={!selectedLocation}
               onClick={() => {
@@ -112,15 +147,59 @@ export default function HomePage() {
           <Typography variant="h4" component="h2" gutterBottom>
             Your Favorite Locations
           </Typography>
+          {favoriteLocations.length === 0 ? (
+            <Card variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+              <CardContent>
+                <Typography variant="h6" color="textSecondary" gutterBottom>
+                  No favorite locations yet
+                </Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                  Search for locations and save them to your favorites for quick access
+                </Typography>
+                <Button variant="contained" color="primary">
+                  Start Exploring
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Grid container spacing={4}>
+              {favoriteLocations.map((loc) => (
+                <Grid item xs={12} sm={6} md={4} key={loc}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        {loc}
+                      </Typography>
+                      <Button size="small">View Details</Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Container>
+      </Box>
+
+      {/* Recent Locations Section */}
+      <Box component="section" sx={{ py: 6, bgcolor: 'common.white' }}>
+        <Container>
+          <Typography variant="h4" component="h2" gutterBottom>
+            Recently Viewed Locations
+          </Typography>
           <Grid container spacing={4}>
-            {favoriteLocations.map((loc) => (
-              <Grid item xs={12} sm={6} md={4} key={loc}>
+            {recentLocations.map((loc) => (
+              <Grid item xs={12} sm={6} md={4} key={loc.id}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
-                      {loc}
+                      {loc.name}
                     </Typography>
-                    <Button size="small">View Details</Button>
+                    <Button
+                      size="small"
+                      onClick={() => navigate(`/location/${loc.id}`)}
+                    >
+                      View Details
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>

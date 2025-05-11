@@ -41,22 +41,10 @@ const stats = [
     color: "#e0f2f1"
   },
   {
-    label: "Preço Médio",
-    icon: <AttachMoneyIcon sx={{ color: "#ff9800" }} fontSize="large" />,
-    getValue: (props) => props.average_price ? `R$ ${Number(props.average_price).toLocaleString('pt-BR')}` : "-",
-    color: "#fff3e0"
-  },
-  {
     label: "Tendência de Preço",
     icon: <TrendingUpIcon sx={{ color: "#388e3c" }} fontSize="large" />,
     getValue: (props) => props.price_trend ?? "+0%",
     color: "#e8f5e9"
-  },
-  {
-    label: "Mediana de Preço",
-    icon: <TrendingFlatIcon sx={{ color: "#1976d2" }} fontSize="large" />,
-    getValue: (props) => props.median_price ? `R$ ${Number(props.median_price).toLocaleString('pt-BR')}` : "-",
-    color: "#e3f2fd"
   },
 ];
 

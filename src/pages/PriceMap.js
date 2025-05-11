@@ -1,27 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Paper, 
-  Slider,
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Grid,
   Card,
-  CardContent
+  CardContent,
+  TextField,
+  InputAdornment,
+  Button,
 } from '@mui/material';
 import { MapContainer, TileLayer, Polygon, Tooltip, useMap } from "react-leaflet";
 import { getLatLngsFromGeometry, getPolygonBounds, FitBounds } from "../utils/geometryUtils";
 import MapLegend from '../components/MapLegend';
 
 function getSublocationStats(locationData, sub_locations, propertyType, priceRange) {
-  const test = sub_locations!=0 ? sub_locations: [locationData];
+  const test = sub_locations && sub_locations.length ? sub_locations : [locationData];
   return test.map(subloc => {
-    const count = subloc.average_price || 0;
-    return { ...subloc, count };
+    // Filter properties by type and price range
+    let filteredProps = Array.isArray(subloc.properties)
+      ? subloc.properties.filter(prop => {
+        const matchesType = propertyType === 'all' || prop.type === propertyType;
+        const price = prop.price || prop.price_value || prop.valor || 0;
+        const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
+        return matchesType && matchesPrice;
+      })
+      : [];
+    // Calculate average price for filtered properties
+    let avg = 0;
+    if (filteredProps.length > 0) {
+      const sum = filteredProps.reduce((acc, prop) => {
+        const price = prop.price || prop.price_value || prop.valor || 0;
+        return acc + price;
+      }, 0);
+      avg = sum / filteredProps.length;
+    }
+    return {
+      ...subloc,
+      count: avg,
+      filteredProperties: filteredProps
+    };
   });
 }
 
@@ -42,9 +65,22 @@ function getColor(value, breaks, colors) {
 }
 
 function PriceMap({ locationId, locationData, sub_locations }) {
-  const [priceRange, setPriceRange] = useState([0, 200000000000]);
-  const [propertyType, setPropertyType] = useState('all');
-  const stats = getSublocationStats(locationData, sub_locations, propertyType, priceRange);
+  const [appliedFilters, setAppliedFilters] = useState({
+    priceRange: [0, 5000000],
+    propertyType: 'all'
+  });
+  const [tempFilters, setTempFilters] = useState({
+    priceRange: [0, 5000000],
+    propertyType: 'all'
+  });
+
+  const stats = getSublocationStats(
+    locationData, 
+    sub_locations, 
+    appliedFilters.propertyType, 
+    appliedFilters.priceRange
+  );
+
   const counts = stats.map(s => s.count);
   const latlngs = getLatLngsFromGeometry(locationData.geometry);
   const bounds = latlngs.length ? getPolygonBounds(latlngs) : null;
@@ -54,48 +90,78 @@ function PriceMap({ locationId, locationData, sub_locations }) {
   const breaks = getPercentileBreaks(counts, percentiles);
   const colors = ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'];
 
-  const handlePriceChange = (event, newValue) => {
-    setPriceRange(newValue);
+  const handlePriceChange = (type) => (event) => {
+    const value = event.target.value.replace(/\D/g, '');
+    const numValue = Number(value);
+    const newPriceRange = [...tempFilters.priceRange];
+    
+    if (type === 'min') {
+      newPriceRange[0] = numValue;
+    } else {
+      newPriceRange[1] = numValue;
+    }
+    
+    setTempFilters(prev => ({
+      ...prev,
+      priceRange: newPriceRange
+    }));
+  };
+
+  const formatPrice = (value) => {
+    return value.toLocaleString('pt-BR');
   };
 
   const handlePropertyTypeChange = (event) => {
-    setPropertyType(event.target.value);
+    setTempFilters(prev => ({
+      ...prev,
+      propertyType: event.target.value
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    setAppliedFilters(tempFilters);
   };
 
   return (
     <div style={{ backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', mb: 3 }}>
+        <Typography variant="h6" component="h1" sx={{ fontWeight: 'bold', mb: 3 }} gutterBottom>
           Análise de Preços Imobiliários
         </Typography>
 
-        <Paper sx={{ p: 3, mb: 3 }}>
+        <Paper id="price-map-filter" sx={{ p: 4, mb: 4 }}>
           <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography gutterBottom>Faixa de Preço (R$)</Typography>
-              <Slider
-                value={priceRange}
-                onChange={handlePriceChange}
-                valueLabelDisplay="auto"
-                min={0}
-                max={5000000}
-                step={50000}
-                valueLabelFormat={(value) => `R$ ${(value/1000).toFixed(0)}K`}
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">
-                  R$ {(priceRange[0]/1000).toFixed(0)}K
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  R$ {(priceRange[1]/1000).toFixed(0)}K
-                </Typography>
-              </Box>
+            <Grid item xs={12}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Preço Mínimo"
+                    value={formatPrice(tempFilters.priceRange[0])}
+                    onChange={handlePriceChange('min')}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Preço Máximo"
+                    value={formatPrice(tempFilters.priceRange[1])}
+                    onChange={handlePriceChange('max')}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                    }}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+            <Grid item xs={12} sm={6} md={12}>
+              <FormControl fullWidth sx={{ minWidth: 200 }}>
                 <InputLabel>Tipo de Imóvel</InputLabel>
                 <Select
-                  value={propertyType}
+                  value={tempFilters.propertyType}
                   label="Tipo de Imóvel"
                   onChange={handlePropertyTypeChange}
                 >
@@ -106,6 +172,16 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                   <MenuItem value="commercial">Comercial</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button 
+                variant="contained" 
+                fullWidth 
+                onClick={handleApplyFilters}
+                sx={{ mt: 2 }}
+              >
+                Aplicar Filtros
+              </Button>
             </Grid>
           </Grid>
         </Paper>
@@ -119,7 +195,7 @@ function PriceMap({ locationId, locationData, sub_locations }) {
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               {bounds && (
                 // Example: force new bounds reference
-                <FitBounds bounds={[...bounds]} options={{ padding: [0,0]}} />
+                <FitBounds bounds={[...bounds]} options={{ padding: [0, 0] }} />
               )}
               {stats.map((subloc, idx) => {
                 const latlngs = getLatLngsFromGeometry(subloc.geometry);
@@ -130,20 +206,20 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                     positions={latlngs}
                     pathOptions={{ fillColor: color, color: "#333", weight: 2, fillOpacity: 0.7 }}
                   >
-                      <Tooltip direction="top" offset={[0, 10]}>
-                        <div style={{ fontSize: '1.1rem', minWidth: 120 }}>
-                          <strong>{subloc.name}</strong>
-                          <br />
-                          Preço médio:&nbsp;
-                          <span style={{ fontWeight: 600, color: '#1976d2' }}>
-                            R$ {Number(subloc.count).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-                          </span>
-                        </div>
-                      </Tooltip>
+                    <Tooltip direction="top" offset={[0, 10]}>
+                      <div style={{ fontSize: '1.1rem', minWidth: 120 }}>
+                        <strong>{subloc.name}</strong>
+                        <br />
+                        Preço médio:&nbsp;
+                        <span style={{ fontWeight: 600, color: '#1976d2' }}>
+                          R$ {Number(subloc.count).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                        </span>
+                      </div>
+                    </Tooltip>
                   </Polygon>
                 );
               })}
-              <MapLegend breaks={breaks} colors={colors} title="Preço Médio"/>
+              <MapLegend breaks={breaks} colors={colors} title="Preço Médio" />
             </MapContainer>
           </Box>
         </Paper>
@@ -153,19 +229,22 @@ function PriceMap({ locationId, locationData, sub_locations }) {
         </Typography>
 
         <Grid container spacing={3}>
-          {['Centro', 'Gamboa', 'Ferrugem', 'Silveira', 'Vigia'].map((neighborhood, index) => (
-            <Grid item xs={12} md={6} lg={4} key={index}>
+          {stats.map((subloc, index) => (
+            <Grid item xs={12} md={6} lg={4} key={subloc.id || index}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    {neighborhood}
+                    {subloc.name}
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary">
                       Preço médio:
                     </Typography>
                     <Typography variant="body2" fontWeight="bold">
-                      R$ {(Math.random() * 1000000 + 500000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                      {subloc.count
+                        ? `R$ ${Number(subloc.count).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                        (${subloc.filteredProperties.length} imóveis)`
+                        : '-'}
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -173,19 +252,11 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                       Imóveis disponíveis:
                     </Typography>
                     <Typography variant="body2" fontWeight="bold">
-                      {Math.floor(Math.random() * 50 + 10)}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Variação (3 meses):
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight="bold" 
-                      color={Math.random() > 0.5 ? 'success.main' : 'error.main'}
-                    >
-                      {Math.random() > 0.5 ? '+' : '-'}{(Math.random() * 5).toFixed(1)}%
+                      {subloc.filteredProperties
+                        ? subloc.filteredProperties.length
+                        : (subloc.properties && Array.isArray(subloc.properties)
+                          ? subloc.properties.length
+                          : '-')}
                     </Typography>
                   </Box>
                 </CardContent>
