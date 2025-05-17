@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -15,7 +15,7 @@ import {
   InputAdornment,
   Button,
 } from '@mui/material';
-import { MapContainer, TileLayer, Polygon, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
 import { getLatLngsFromGeometry, getPolygonBounds, FitBounds } from "../utils/geometryUtils";
 import MapLegend from '../components/MapLegend';
 
@@ -75,9 +75,9 @@ function PriceMap({ locationId, locationData, sub_locations }) {
   });
 
   const stats = getSublocationStats(
-    locationData, 
-    sub_locations, 
-    appliedFilters.propertyType, 
+    locationData,
+    sub_locations,
+    appliedFilters.propertyType,
     appliedFilters.priceRange
   );
 
@@ -92,18 +92,13 @@ function PriceMap({ locationId, locationData, sub_locations }) {
 
   const handlePriceChange = (type) => (event) => {
     const value = event.target.value.replace(/\D/g, '');
-    const numValue = Number(value);
-    const newPriceRange = [...tempFilters.priceRange];
-    
-    if (type === 'min') {
-      newPriceRange[0] = numValue;
-    } else {
-      newPriceRange[1] = numValue;
-    }
-    
+    const numValue = parseInt(value) || 0;
+
     setTempFilters(prev => ({
       ...prev,
-      priceRange: newPriceRange
+      priceRange: type === 'min'
+        ? [numValue, prev.priceRange[1]]
+        : [prev.priceRange[0], numValue]
     }));
   };
 
@@ -137,7 +132,7 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                   <TextField
                     fullWidth
                     label="Preço Mínimo"
-                    value={formatPrice(tempFilters.priceRange[0])}
+                    value={tempFilters.priceRange[0]}
                     onChange={handlePriceChange('min')}
                     InputProps={{
                       startAdornment: <InputAdornment position="start">R$</InputAdornment>,
@@ -148,7 +143,7 @@ function PriceMap({ locationId, locationData, sub_locations }) {
                   <TextField
                     fullWidth
                     label="Preço Máximo"
-                    value={formatPrice(tempFilters.priceRange[1])}
+                    value={tempFilters.priceRange[1]}
                     onChange={handlePriceChange('max')}
                     InputProps={{
                       startAdornment: <InputAdornment position="start">R$</InputAdornment>,
@@ -174,9 +169,9 @@ function PriceMap({ locationId, locationData, sub_locations }) {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <Button 
-                variant="contained" 
-                fullWidth 
+              <Button
+                variant="contained"
+                fullWidth
                 onClick={handleApplyFilters}
                 sx={{ mt: 2 }}
               >

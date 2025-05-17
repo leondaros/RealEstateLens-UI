@@ -32,27 +32,27 @@ const LocationPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If navigation state is present, use it and never overwrite
     if (location.state) {
       setLocationData(location.state);
       setLoading(false);
-      addToRecentLocations(locationData);
+      addToRecentLocations(location.state); // Changed from locationData to location.state
       return;
     }
-    // Otherwise, fetch from backend using getLocationDetails only
+
     const fetchData = async () => {
       try {
+        console.log('Fetching location details for ID:', id);
         const response = await getLocationDetails(id);
         setLocationData(response);
         setLoading(false);
-        addToRecentLocations(locationData);
+        addToRecentLocations(response); // Changed from locationData to response
       } catch (error) {
         console.error("Error fetching location data:", error);
         setLoading(false);
       }
     };
     fetchData();
-  }, [id, location.state, locationData]);
+  }, [id, location.state]); // Removed locationData from dependencies
 
   if (!locationData) {
     return <div>Loading...</div>;
@@ -65,7 +65,7 @@ const LocationPage = () => {
   return (
     <Box>
       <MainAppBar locationName={'RealEstateLens'} />
-      <HeroSection name={locationData.name} />
+      <HeroSection name={locationData.name} locationId={locationData.id} />
       <Container maxWidth="lg">
         <Paper sx={{ mb: 3 }}>
           <Tabs

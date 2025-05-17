@@ -53,3 +53,15 @@ export async function getUsersId(id) {
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
+
+export async function toggleFavoriteLocation(userId, locationId) {
+    const res = await fetch(`${API_URL}/users/${userId}/toggle-favorite/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ location_id: locationId })
+    });
+    if (!res.ok) throw new Error('Erro ao favoritar/desfavoritar localização');
+    return res.json();
+}
