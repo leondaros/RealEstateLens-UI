@@ -15,11 +15,7 @@ import MainAppBar from '../components/MainAppBar';
 import { getLocationByName } from '../services/Api';
 import { useNavigate } from 'react-router-dom';
 import { addToRecentLocations } from '../utils/locationUtils';
-
-// Sample data - replace with API or context-driven data
-const popularLocations = ['New York, NY', 'San Francisco, CA', 'Austin, TX', 'Miami, FL'];
-const greenCities = ['Portland, OR', 'Copenhagen, Denmark', 'Vancouver, Canada', 'Amsterdam, NL'];
-const favoriteLocations = [];
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function HomePage() {
   const [searchInput, setSearchInput] = useState('');
@@ -28,7 +24,10 @@ export default function HomePage() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [recentLocations, setRecentLocations] = useState([]);
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const user = useSelector(state => state.user.user);
+  const favoriteLocations = user?.favorite_locations || [];
 
   const handleSearchInputChange = async (event, value, reason) => {
     setSearchInput(value);
@@ -84,7 +83,6 @@ export default function HomePage() {
       window.removeEventListener('focus', loadRecentLocations);
     };
   }, []); // Empty dependency array since we want this to run only once on mount
-
 
   return (
     <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh' }}>
@@ -164,13 +162,15 @@ export default function HomePage() {
           ) : (
             <Grid container spacing={4}>
               {favoriteLocations.map((loc) => (
-                <Grid item xs={12} sm={6} md={4} key={loc}>
+                <Grid item xs={12} sm={6} md={4} key={loc.id}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
-                        {loc}
+                        {loc.name}
                       </Typography>
-                      <Button size="small">View Details</Button>
+                      <Button size="small" onClick={() => navigate(`/location/${loc.id}`)}>
+                        View Details
+                      </Button>
                     </CardContent>
                   </Card>
                 </Grid>

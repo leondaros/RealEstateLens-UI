@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Container,
   Typography,
@@ -11,21 +11,32 @@ import SearchIcon from "@mui/icons-material/Search";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { toggleFavoriteLocation } from "../services/Api";
+import { useSelector, useDispatch } from "react-redux";
+import { updateFavorites } from "../slices/userSlice";
 
 const HeroSection = ({ name, locationId }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.user.user);
+  const isFavorite = user?.favorite_locations?.some(loc => loc.id === locationId);
 
   const handleToggleFavorite = async () => {
     try {
-      // TODO: Get actual userId from authentication context
-      const userId = '1'; // temporary hardcoded user ID
-      console.log('Toggling favorite for user:', userId, 'location:', locationId);
-      await toggleFavoriteLocation(userId, locationId);
-      setIsFavorite(!isFavorite);
+      if (!user) return;
+      const result = await toggleFavoriteLocation(user.id, locationId);
+      console.log('Toggling favorite for location:', locationId, 'Result:', result);
+      if (result && result.favorite_locations) {
+        dispatch(updateFavorites(result.favorite_locations));
+      } else {
+        // fallback: limpa favoritos se a resposta for vazia
+        console.warn('No favorite locations returned, resetting favorites.');
+        dispatch(updateFavorites([]));
+      }
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }
   };
+
+  if (!user) return null; // Ou um loading, se preferir
 
   return (
     <Box sx={{ bgcolor: "#2E2E2E", color: "white", py: 8, textAlign: "center" }}>
@@ -37,6 +48,7 @@ const HeroSection = ({ name, locationId }) => {
           <IconButton 
             onClick={handleToggleFavorite}
             sx={{ color: isFavorite ? 'red' : 'white' }}
+            disabled={!user}
           >
             {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
           </IconButton>
