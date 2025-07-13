@@ -65,3 +65,38 @@ export async function toggleFavoriteLocation(userId, locationId) {
     if (!res.ok) throw new Error('Erro ao favoritar/desfavoritar localização');
     return res.json();
 }
+export async function registerUser(username, email, password, role) {
+    const res = await fetch(`${API_URL}/users/register/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: username, email: email, password: password, role: role })
+    });
+    if (!res.ok) throw new Error('Erro ao registrar usuário');
+    return res.json();
+}
+
+export async function loginUser(username, password) {
+    const res = await fetch(`${API_URL}/api/token/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: username, password: password })
+    });
+    if (!res.ok) throw new Error('Erro ao fazer login');
+    return res.json();
+}
+
+export async function refreshToken(token) {
+    const res = await fetch(`${API_URL}/api/token/refresh/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh: token })
+    });
+    if (!res.ok) throw new Error('Erro ao atualizar token');
+    return res.json();
+}
