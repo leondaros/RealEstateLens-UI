@@ -66,15 +66,26 @@ export async function toggleFavoriteLocation(userId, locationId) {
     return res.json();
 }
 export async function registerUser(username, email, password, role) {
-    const res = await fetch(`${API_URL}/users/register/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: username, email: email, password: password, role: role })
-    });
-    if (!res.ok) throw new Error('Erro ao registrar usuário');
-    return res.json();
+    try {
+        const res = await fetch(`${API_URL}/users/register/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, email, password, role })
+        });
+        
+        if (!res.ok) {
+            const errorData = await res.json();
+            console.error('Registration error:', errorData);
+            throw new Error(errorData.detail || 'Erro ao registrar usuário');
+        }
+        
+        return res.json();
+    } catch (error) {
+        console.error('Registration failed:', error);
+        throw error;
+    }
 }
 
 export async function loginUser(username, password) {
