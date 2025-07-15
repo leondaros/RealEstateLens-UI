@@ -1,55 +1,81 @@
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 export async function getLocations() {
-  const res = await fetch(`${API_URL}/locations/`);
+  const res = await fetch(`${API_URL}/locations/`,{
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error('Erro ao buscar dados');
   return res.json();
 }
 
 export async function getLocationbyId(id) {
-    const res = await fetch(`${API_URL}/locations/${id}/`);
+    const res = await fetch(`${API_URL}/locations/${id}/`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
 export async function getLocationProperties(id) {
-    const res = await fetch(`${API_URL}/locations/${id}/properties/`);
+    const res = await fetch(`${API_URL}/locations/${id}/properties/`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
 export async function getLocationDetails(id) {
-    const res = await fetch(`${API_URL}/locations/${id}/details/`);
+    const res = await fetch(`${API_URL}/locations/${id}/details/`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
 export async function getLocationByName(name) {
-    const res = await fetch(`${API_URL}/locations/search/?q=${name}`);
+    const res = await fetch(`${API_URL}/locations/search/?q=${name}`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
 export async function getProperties() {
-    const res = await fetch(`${API_URL}/properties/`);
+    const res = await fetch(`${API_URL}/properties/`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
 export async function getPropertyId(id) {
-    const res = await fetch(`${API_URL}/properties/${id}/`);
+    const res = await fetch(`${API_URL}/properties/${id}/`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
 export async function getUsers() {
-    const res = await fetch(`${API_URL}/users/`);
+    const res = await fetch(`${API_URL}/users/`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
 
 export async function getUsersId(id) {
-    const res = await fetch(`${API_URL}/users/${id}/`);
+    const res = await fetch(`${API_URL}/users/${id}/`,{
+      headers: getHeaders()
+    });
     if (!res.ok) throw new Error('Erro ao buscar dados');
     return res.json();
 }
@@ -57,9 +83,7 @@ export async function getUsersId(id) {
 export async function toggleFavoriteLocation(userId, locationId) {
     const res = await fetch(`${API_URL}/users/${userId}/toggle-favorite/`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         body: JSON.stringify({ location_id: locationId })
     });
     if (!res.ok) throw new Error('Erro ao favoritar/desfavoritar localização');
@@ -94,7 +118,7 @@ export async function loginUser(username, password) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username: username, password: password })
+        body: JSON.stringify({ username, password })
     });
     if (!res.ok) throw new Error('Erro ao fazer login');
     return res.json();

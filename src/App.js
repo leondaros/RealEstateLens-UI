@@ -19,21 +19,12 @@ function App() {
   const { user: authUser } = useAuth();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (authUser && authUser.id) {
-        try {
-          const userData = await getUsersId(authUser.id);
-          dispatch(setUser(userData));
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          dispatch(setUser(null));
-        }
-      } else {
-        dispatch(setUser(null));
-      }
-    };
-
-    fetchUser();
+    // Only update Redux store with existing auth user data
+    if (authUser) {
+      dispatch(setUser(authUser));
+    } else {
+      dispatch(setUser(null));
+    }
   }, [dispatch, authUser]);
 
   return (

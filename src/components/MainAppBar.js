@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Box, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { useSelector } from 'react-redux';
+
 
 const MainAppBar = ({ locationName = 'Garopaba' }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const {logout, isAuthenticated } = useAuth();
+  // Fix: Select user from state.user instead of entire state
+  const user = useSelector(state => state.user);
+
+  // Add debugging to check auth state changes
+  useEffect(() => {
+    console.log('MainAppBar auth state:', {user});
+  }, [user, isAuthenticated]);
 
   return (
     <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: 'white' }}>
@@ -23,10 +32,10 @@ const MainAppBar = ({ locationName = 'Garopaba' }) => {
           {locationName}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {user ? (
+          {isAuthenticated ? (
             <>
               <Typography sx={{ alignSelf: 'center' }}>
-                {user.username}
+                {user?.data?.username || 'User'}
               </Typography>
               <Button 
                 variant="outlined" 
