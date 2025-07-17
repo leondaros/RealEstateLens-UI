@@ -76,12 +76,11 @@ export const AuthProvider = ({ children }) => {
     const response = await loginUser(username, password);
     setToken(response.access);
     setRefreshToken(response.refresh);
-    
-    const userData = await getUsersId(response.user.id);
-    setUser(userData);
-
     updateStorage(STORAGE_KEYS.TOKEN, response.access);
     updateStorage(STORAGE_KEYS.REFRESH_TOKEN, response.refresh);
+
+    const userData = await getUsersId(response.user.id);
+    setUser(userData);
     updateStorage(STORAGE_KEYS.USER, userData);
 
     dispatch(setUserRedux(userData));
@@ -94,6 +93,12 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAuthenticated: Boolean(token)
   };
+
+  useEffect(() => {
+    if (user) {
+      dispatch(setUserRedux(user));
+    }
+  }, [user, dispatch]);
 
   return (
     <AuthContext.Provider value={authState}>
