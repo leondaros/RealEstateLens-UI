@@ -14,7 +14,9 @@ const userSlice = createSlice({
       state.data = action.payload;
     },
     clearUser(state) {
-      state.user = null;
+      state.data = initialState.data;
+      state.isLoading = initialState.isLoading;
+      state.error = initialState.error;
     },
     updateFavorites(state, action) {
       if (state.user) {

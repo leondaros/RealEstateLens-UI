@@ -1,11 +1,8 @@
 // filepath: src/pages/LoginPage.js
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState } from 'react';
 import { Container, Paper, TextField, Button, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { loginUser, getUsersId } from '../services/Api';
 import { useAuth } from '../auth/AuthContext';
-import { setUser } from '../slices/userSlice';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -13,7 +10,6 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
-  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,16 +21,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await loginUser(username, password);
-      
-      // Then update Auth context with the same user data
-      login(response.access, response.refresh);
-      
-      const userData = await getUsersId(response.user.id);
-      
-      // First update Redux store
-      dispatch(setUser(userData));
-            
+      await login(username, password);
       navigate('/');
     } catch (err) {
       setError('Invalid credentials');
