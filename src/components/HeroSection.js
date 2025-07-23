@@ -12,11 +12,11 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { toggleFavoriteLocation } from "../services/Api";
 import { useSelector, useDispatch } from "react-redux";
-import { updateFavorites } from "../slices/userSlice";
+import { setUser } from "../slices/userSlice";
 
 const HeroSection = ({ name, locationId }) => {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.user.user);
+  const user = useSelector(state => state.user.data);
   const isFavorite = user?.favorite_locations?.some(loc => loc.id === locationId);
 
   const handleToggleFavorite = async () => {
@@ -24,13 +24,7 @@ const HeroSection = ({ name, locationId }) => {
       if (!user) return;
       const result = await toggleFavoriteLocation(user.id, locationId);
       console.log('Toggling favorite for location:', locationId, 'Result:', result);
-      if (result && result.favorite_locations) {
-        dispatch(updateFavorites(result.favorite_locations));
-      } else {
-        // fallback: limpa favoritos se a resposta for vazia
-        console.warn('No favorite locations returned, resetting favorites.');
-        dispatch(updateFavorites([]));
-      }
+      dispatch(setUser(result)); // Update user state with new favorite locations
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }
