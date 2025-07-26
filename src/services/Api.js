@@ -80,6 +80,47 @@ export async function getUsersId(id) {
     return res.json();
 }
 
+export async function getLocationEducationalInstitutions(id) {
+    const res = await fetch(`${API_URL}/locations/${id}/schools/`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Erro ao buscar dados de educação');
+    return res.json();
+}
+
+export async function getLocationLeisure(id) {
+    const res = await fetch(`${API_URL}/locations/${id}/leisure/`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Erro ao buscar dados de lazer');
+    return res.json();
+}
+
+export async function getLocationMobility(id) {
+    const res = await fetch(`${API_URL}/locations/${id}/mobility/`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Erro ao buscar dados de mobilidade');
+    return res.json();
+}
+
+export async function getLocationCommerce(id) {
+    const res = await fetch(`${API_URL}/locations/${id}/commerce/`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Erro ao buscar dados de comércio');
+    return res.json();
+}
+
+export async function getLocationHealth(id) {
+    const res = await fetch(`${API_URL}/locations/${id}/health/`, {
+      headers: getHeaders()
+    });
+    if (!res.ok) throw new Error('Erro ao buscar dados de saúde');
+    return res.json();
+}
+
+
 export async function toggleFavoriteLocation(userId, locationId) {
     const res = await fetch(`${API_URL}/users/${userId}/toggle-favorite/`, {
         method: 'POST',

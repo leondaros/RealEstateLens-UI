@@ -26,7 +26,7 @@ export default function HomePage() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector(state => state.user.user);
+  const user = useSelector(state => state.user.data);
   const favoriteLocations = user?.favorite_locations || [];
 
   const handleSearchInputChange = async (event, value, reason) => {
@@ -154,9 +154,15 @@ export default function HomePage() {
                 <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
                   Search for locations and save them to your favorites for quick access
                 </Typography>
-                <Button variant="contained" color="primary">
-                  Start Exploring
-                </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                document.querySelector('input[placeholder="Enter city, neighborhood, or ZIP code"]')?.focus();
+              }}
+            >
+              Start Exploring
+            </Button>
               </CardContent>
             </Card>
           ) : (

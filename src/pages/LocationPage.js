@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Box,
@@ -12,7 +12,8 @@ import LocationsList from "../components/LocationList";
 import LocationStats from "../components/LocationStats";
 import LocationReviews from "../components/LocationReviews";
 import MainAppBar from "../components/MainAppBar";
-import { getLocationDetails } from "../services/Api";
+import { getLocationDetails, getLocationCommerce, getLocationLeisure, 
+  getLocationMobility, getLocationEducationalInstitutions, getLocationHealth} from "../services/Api";
 import { useLocation, useParams, Link } from "react-router-dom";
 import MapIcon from '@mui/icons-material/Map';
 import LayersIcon from '@mui/icons-material/Layers';
@@ -27,6 +28,7 @@ const LocationPage = () => {
   const location = useLocation();
   // Always use navigation state if present, otherwise null
   const [locationData, setLocationData] = useState(location.state || null);
+  const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(!location.state);
   const [tab, setTab] = useState(0);
   const navigate = useNavigate();
@@ -53,6 +55,38 @@ const LocationPage = () => {
     };
     fetchData();
   }, [id, location.state]); // Removed locationData from dependencies
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [commerce, leisure, mobility, education, health] = await Promise.all([
+          getLocationCommerce(id),
+          getLocationLeisure(id),
+          getLocationMobility(id),
+          getLocationEducationalInstitutions(id),
+          getLocationHealth(id)
+        ]);
+        setStats({
+          commerce: commerce?.length ?? 0,
+          leisure: leisure?.length ?? 0,
+          mobility: mobility?.length ?? 0,
+          education: education?.length ?? 0,
+          health: health?.length ?? 0
+        });
+
+        console.log("Fetched stats:", {
+          commerce: commerce.length,
+          leisure: leisure,
+          mobility: mobility,
+          education: education,
+          health: health
+        });
+      } catch (e) {
+        console.error("Erro ao buscar estatísticas", e);
+      }
+    };
+    fetchAll();
+  }, [id]);
 
   if (!locationData) {
     return <div>Loading...</div>;
@@ -85,11 +119,11 @@ const LocationPage = () => {
           <>
             <LocationStats
               name={locationData.name}
-              rating={locationData.rating}
-              commerce={locationData.commerce}
-              leisure={locationData.leisure}
-              mobility={locationData.mobility}
-              education={locationData.education}
+              commerce={stats.commerce}
+              leisure={stats.leisure}
+              mobility={stats.mobility}
+              education={stats.education}
+              health={stats.health}
               price_per_m2={locationData.price_per_m2}
               price_trend={locationData.price_trend}
             />
