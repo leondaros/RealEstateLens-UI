@@ -19,6 +19,8 @@ import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
 import { getLatLngsFromGeometry, getPolygonBounds, FitBounds } from "../utils/geometryUtils";
 import MapLegend from '../components/MapLegend';
 
+//TODO: Get Average from Backend
+// This function calculates the average price for each sub-location based on the provided filters
 function getSublocationStats(locationData, sub_locations, propertyType, priceRange) {
   const test = sub_locations && sub_locations.length ? sub_locations : [locationData];
   return test.map(subloc => {

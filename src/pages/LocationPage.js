@@ -22,6 +22,7 @@ import PriceMap from "./PriceMap";
 import PropertyDensity from "./PropertyDensity";
 import { useNavigate } from 'react-router-dom';
 import { addToRecentLocations } from "../utils/locationUtils";
+import { formatCurrency } from "../utils/formatUtils";
 
 const LocationPage = () => {
   const { id } = useParams();
@@ -73,14 +74,6 @@ const LocationPage = () => {
           education: education?.length ?? 0,
           health: health?.length ?? 0
         });
-
-        console.log("Fetched stats:", {
-          commerce: commerce.length,
-          leisure: leisure,
-          mobility: mobility,
-          education: education,
-          health: health
-        });
       } catch (e) {
         console.error("Erro ao buscar estatísticas", e);
       }
@@ -124,8 +117,7 @@ const LocationPage = () => {
               mobility={stats.mobility}
               education={stats.education}
               health={stats.health}
-              price_per_m2={locationData.price_per_m2}
-              price_trend={locationData.price_trend}
+              price_per_m2={formatCurrency(locationData.average_price_per_m2)}
             />
             <LocationReviews />
             <Box display="flex" justifyContent="center" mt={4} mb={4}>

@@ -45,12 +45,6 @@ const stats = [
     key: "price_per_m2",
     color: "#e0f2f1"
   },
-  {
-    label: "Tendência de Preço",
-    icon: <TrendingUpIcon sx={{ color: "#388e3c" }} fontSize="large" />,
-    key: "price_trend",
-    color: "#e8f5e9"
-  },
 ];
 
 const LocationStats = ({
@@ -64,7 +58,6 @@ const LocationStats = ({
   education,
   health,
   price_per_m2,
-  price_trend,
   median_price
 }) => {
   const props = {
@@ -78,7 +71,6 @@ const LocationStats = ({
     education,
     health,
     price_per_m2,
-    price_trend,
     median_price
   };
 
