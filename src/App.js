@@ -10,7 +10,6 @@ import RegisterPage from './pages/RegisterPage';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUser } from './slices/userSlice';
-import { getUsersId } from './services/Api';
 import LoginPage from './pages/LoginPage';
 import { useAuth } from './auth/AuthContext';
 
