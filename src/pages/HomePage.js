@@ -24,7 +24,6 @@ export default function HomePage() {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [recentLocations, setRecentLocations] = useState([]);
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(state => state.user.data);
   const favoriteLocations = user?.favorite_locations || [];
