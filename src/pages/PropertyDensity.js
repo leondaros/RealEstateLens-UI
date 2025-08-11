@@ -8,16 +8,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip
+  Grid
 } from '@mui/material';
 import { MapContainer, TileLayer, Polygon, Tooltip } from "react-leaflet";
 import HeatmapLayer from "../components/HeatmapLayer";

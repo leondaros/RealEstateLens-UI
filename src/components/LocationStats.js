@@ -3,7 +3,6 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import ParkIcon from "@mui/icons-material/Park";
 import DirectionsTransitIcon from "@mui/icons-material/DirectionsTransit";
 import SchoolIcon from "@mui/icons-material/School";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital"; // Corrigido ícone
 import { Skeleton } from "@mui/material";

@@ -104,10 +104,6 @@ function PriceMap({ locationId, locationData, sub_locations }) {
     }));
   };
 
-  const formatPrice = (value) => {
-    return value.toLocaleString('pt-BR');
-  };
-
   const handlePropertyTypeChange = (event) => {
     setTempFilters(prev => ({
       ...prev,

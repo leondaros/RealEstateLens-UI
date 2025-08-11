@@ -1,13 +1,3 @@
-const sanitizeLocation = (location) => {
-  return {
-    id: location.id,
-    name: location.name,
-    // Add only essential fields you need to display
-    type: location.type,
-    // Avoid storing large data like images or detailed descriptions
-  };
-};
-
 export const addToRecentLocations = (location) => {
   try {
     const stored = localStorage.getItem('recentLocations');
