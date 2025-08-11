@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -15,7 +15,7 @@ import MainAppBar from '../components/MainAppBar';
 import { getLocationByName } from '../services/Api';
 import { useNavigate } from 'react-router-dom';
 import { addToRecentLocations } from '../utils/locationUtils';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 export default function HomePage() {
   const [searchInput, setSearchInput] = useState('');
