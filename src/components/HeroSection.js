@@ -47,19 +47,6 @@ const HeroSection = ({ name, locationId }) => {
             {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
           </IconButton>
         </Box>
-        <TextField
-          fullWidth
-          placeholder="Looking for your favorite Neighborhood"
-          variant="outlined"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ mt: 3, bgcolor: "white", borderRadius: 5, boxShadow: 1 }}
-        />
       </Container>
     </Box>
   );

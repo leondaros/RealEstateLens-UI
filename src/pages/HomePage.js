@@ -90,7 +90,7 @@ export default function HomePage() {
       <Box component="section" sx={{ bgcolor: 'common.white', py: 8 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
           <Typography variant="h3" component="h1" gutterBottom>
-            Welcome Back!
+            Welcome!
           </Typography>
           <Typography variant="h6" color="textSecondary" gutterBottom>
             Discover locations you love or search for new areas.

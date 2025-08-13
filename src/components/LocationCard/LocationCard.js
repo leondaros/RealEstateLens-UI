@@ -30,7 +30,7 @@ const LocationCard = (props) => {
   };
 
   return (
-    <Card sx={{ borderRadius: 2, boxShadow: 4, overflow: 'hidden', height: 300 }}>
+    <Card sx={{ borderRadius: 2, boxShadow: 4, overflow: 'hidden', height: 270 }}>
       <CardActionArea onClick={handleCardClick}>
         <Box sx={{ height: 200, width: '100%', position: 'relative' }}>
           <MapContainer
@@ -64,20 +64,6 @@ const LocationCard = (props) => {
           <Typography className="card-title" variant="h6" align="center" gutterBottom>
             {name}
           </Typography>
-          <Stack direction="row" spacing={3} justifyContent="center">
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <LocationCityIcon />
-              <Typography variant="body2">{rating}</Typography>
-            </Stack>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <SecurityIcon />
-              <Typography variant="body2">{safety}</Typography>
-            </Stack>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <AttachMoneyIcon />
-              <Typography variant="body2">${average_price}</Typography>
-            </Stack>
-          </Stack>
         </CardContent>
       </CardActionArea>
     </Card>

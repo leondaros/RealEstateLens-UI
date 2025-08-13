@@ -127,30 +127,6 @@ useEffect(() => {
               health={stats.health}
               price_per_m2={formatCurrency(locationData.average_price_per_m2)}
             />
-            <LocationReviews />
-            <Box display="flex" justifyContent="center" mt={4} mb={4}>
-              <Button
-                variant="contained"
-                color="primary"
-                component={Link}
-                to={`/location/${id}/contribution`}
-                sx={{
-                  padding: '12px 24px',
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  borderRadius: '28px',
-                  textTransform: 'none',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
-                  },
-                  transition: 'all 0.2s ease-in-out'
-                }}
-              >
-                Compartilhe sua experiência neste local
-              </Button>
-            </Box>
             {locationData && locationData.sub_locations && locationData.sub_locations.length > 0 && (
               <LocationsList locations={locationData} />
             )}
