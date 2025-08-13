@@ -11,7 +11,7 @@ import { getPolygonBounds, FitBounds, getLatLngsFromGeometry } from "../../utils
 import "./LocationCard.css";
 
 const LocationCard = (props) => {
-  const { id, name, rating, safety, average_price, geometry } = props;
+  const { id, name, geometry } = props;
   const latlngs = getLatLngsFromGeometry(geometry);
   const bounds = latlngs.length ? getPolygonBounds(latlngs) : null;
   const navigate = useNavigate();
