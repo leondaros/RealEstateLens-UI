@@ -5,16 +5,14 @@ import {
   Tabs,
   Tab,
   Paper,
-  Button,
 } from "@mui/material";
 import HeroSection from "../components/HeroSection";
 import LocationsList from "../components/LocationList";
 import LocationStats from "../components/LocationStats";
-import LocationReviews from "../components/LocationReviews";
 import MainAppBar from "../components/MainAppBar";
 import { getLocationDetails, getLocationCommerce, getLocationLeisure, 
   getLocationMobility, getLocationEducationalInstitutions, getLocationHealth} from "../services/Api";
-import { useLocation, useParams, Link } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import MapIcon from '@mui/icons-material/Map';
 import LayersIcon from '@mui/icons-material/Layers';
 import InfoIcon from '@mui/icons-material/Info';
