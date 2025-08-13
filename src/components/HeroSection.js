@@ -1,13 +1,9 @@
-import React from "react";
 import {
   Container,
   Typography,
-  TextField,
-  InputAdornment,
   Box,
   IconButton,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { toggleFavoriteLocation } from "../services/Api";

@@ -1,15 +1,10 @@
-import React from "react";
 import {
   Typography,
   Box,
   Card,
   CardContent,
-  Stack,
   CardActionArea,
 } from "@mui/material";
-import LocationCityIcon from "@mui/icons-material/LocationCity";
-import SecurityIcon from "@mui/icons-material/Security";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { MapContainer, TileLayer, Polygon } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import { getPolygonBounds, FitBounds, getLatLngsFromGeometry } from "../../utils/geometryUtils";
