@@ -22,6 +22,7 @@ import PriceMap from "./PriceMap";
 import PropertyDensity from "./PropertyDensity";
 import { addToRecentLocations } from "../utils/locationUtils";
 import { formatCurrency } from "../utils/formatUtils";
+import LoadingScreen from "../components/LoadingScreen";
 
 const LocationPage = () => {
   const { id } = useParams();
@@ -90,7 +91,7 @@ useEffect(() => {
 }, [id]);
 
   if (loading || !locationData) {
-    return <div>Loading...</div>;
+    return <LoadingScreen hint="Buscando informações do local..." />;
   }
 
   const handleTabChange = (event, newValue) => {
