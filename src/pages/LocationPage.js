@@ -73,11 +73,11 @@ useEffect(() => {
         getLocationHealth(locationData.id)
       ]);
       setStats({
-        commerce: commerce?.status === "fulfilled" ? commerce.value.length : 0,
-        leisure: leisure?.status === "fulfilled" ? leisure.value.length : 0,
-        mobility: mobility?.status === "fulfilled" ? mobility.value.length : 0,
-        education: education?.status === "fulfilled" ? education.value.length : 0,
-        health: health?.status === "fulfilled" ? health.value.length : 0
+        commerce: commerce?.status === "fulfilled" ? commerce.value.count : 0,
+        leisure: leisure?.status === "fulfilled" ? leisure.value.count : 0,
+        mobility: mobility?.status === "fulfilled" ? mobility.value.count : 0,
+        education: education?.status === "fulfilled" ? education.value.count : 0,
+        health: health?.status === "fulfilled" ? health.value.count : 0
       });
     } catch (e) {
       console.error("Erro ao buscar estatísticas", e);
