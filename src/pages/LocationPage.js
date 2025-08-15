@@ -63,27 +63,30 @@ useEffect(() => {
   // Opcional: pode zerar as estatísticas antes da nova busca
   setStats({});
 
-  const fetchAll = async () => {
-    try {
-      const [commerce, leisure, mobility, education, health] = await Promise.allSettled([
-        getLocationCommerce(locationData.id),
-        getLocationLeisure(locationData.id),
-        getLocationMobility(locationData.id),
-        getLocationEducationalInstitutions(locationData.id),
-        getLocationHealth(locationData.id)
-      ]);
-      setStats({
-        commerce: commerce?.status === "fulfilled" ? commerce.value.count : 0,
-        leisure: leisure?.status === "fulfilled" ? leisure.value.count : 0,
-        mobility: mobility?.status === "fulfilled" ? mobility.value.count : 0,
-        education: education?.status === "fulfilled" ? education.value.count : 0,
-        health: health?.status === "fulfilled" ? health.value.count : 0
+  const calls = [
+    ["commerce",  () => getLocationCommerce(locationData.id)],
+    ["leisure",   () => getLocationLeisure(locationData.id)],
+    ["mobility",  () => getLocationMobility(locationData.id)],
+    ["education", () => getLocationEducationalInstitutions(locationData.id)],
+    ["health",    () => getLocationHealth(locationData.id)],
+  ];
+
+  const load = (key, fn) => {
+    fn()
+      .then((data) => {
+        const n = Number(data?.count) || 0;
+        setStats(prev => ({ ...prev, [key]: n }));
+      })
+      .catch((err) => {
+        console.warn(`Falha em ${key}`, err);
+        setStats(prev => ({ ...prev, [key]: 0 }));
       });
-    } catch (e) {
-      console.error("Erro ao buscar estatísticas", e);
-    }
   };
-  fetchAll();
+
+  // dispara em paralelo; ajuste/remova o stagger se quiser
+  calls.forEach(([key, fn], idx) => {
+    setTimeout(() => load(key, fn), idx * 150);
+  });
 }, [locationData?.id]);
 
   if (loading || !locationData) {
