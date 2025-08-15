@@ -33,8 +33,6 @@ const LocationPage = () => {
 
 useEffect(() => {
   // Limpa os dados antigos antes de buscar os novos
-  setLocationData(null);
-  setStats({});
   setLoading(true);
 
   if (location.state) {
@@ -60,33 +58,33 @@ useEffect(() => {
 
 useEffect(() => {
   // Evita buscar estatísticas se ainda não temos dados da location
-  if (!id) return;
+  if (!locationData?.id) return;
 
   // Opcional: pode zerar as estatísticas antes da nova busca
   setStats({});
 
   const fetchAll = async () => {
     try {
-      const [commerce, leisure, mobility, education, health] = await Promise.all([
-        getLocationCommerce(id),
-        getLocationLeisure(id),
-        getLocationMobility(id),
-        getLocationEducationalInstitutions(id),
-        getLocationHealth(id)
+      const [commerce, leisure, mobility, education, health] = await Promise.allSettled([
+        getLocationCommerce(locationData.id),
+        getLocationLeisure(locationData.id),
+        getLocationMobility(locationData.id),
+        getLocationEducationalInstitutions(locationData.id),
+        getLocationHealth(locationData.id)
       ]);
       setStats({
-        commerce: commerce?.length ?? 0,
-        leisure: leisure?.length ?? 0,
-        mobility: mobility?.length ?? 0,
-        education: education?.length ?? 0,
-        health: health?.length ?? 0
+        commerce: commerce?.status === "fulfilled" ? commerce.value.count : 0,
+        leisure: leisure?.status === "fulfilled" ? leisure.value.count : 0,
+        mobility: mobility?.status === "fulfilled" ? mobility.value.count : 0,
+        education: education?.status === "fulfilled" ? education.value.count : 0,
+        health: health?.status === "fulfilled" ? health.value.count : 0
       });
     } catch (e) {
       console.error("Erro ao buscar estatísticas", e);
     }
   };
   fetchAll();
-}, [id]);
+}, [locationData?.id]);
 
   if (loading || !locationData) {
     return <LoadingScreen hint="Buscando informações do local..." />;
