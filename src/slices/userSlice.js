@@ -19,8 +19,8 @@ const userSlice = createSlice({
       state.error = initialState.error;
     },
     updateFavorites(state, action) {
-      if (state.user) {
-        state.user.favorite_locations = action.payload;
+      if (state.data) {
+        state.data.favorite_locations = action.payload;
       }
     },
   },
